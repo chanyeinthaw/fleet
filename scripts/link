@@ -41,7 +41,20 @@ link_skills() {
   done
 }
 
+remove_managed_link() {
+  local source="$1"
+  local target="$2"
+
+  if [[ -L "$target" && "$(readlink "$target")" == "$source" ]]; then
+    rm "$target"
+    printf 'Removed obsolete link %s\n' "$target"
+  fi
+}
+
 mkdir -p "$pi_home" "$codex_home"
+
+remove_managed_link "$repo/agents/pi/extensions/subagents.txt" "$pi_home/extensions/subagents.txt"
+remove_managed_link "$repo/agents/pi/packages" "$pi_home/packages"
 
 link_path "$repo/prompts/AGENTS.md" "$pi_home/AGENTS.md"
 link_path "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
@@ -56,8 +69,7 @@ for path in \
   .oxfmtrc.json \
   .oxlintrc.json \
   themes \
-  src \
-  packages; do
+  src; do
   link_path "$repo/agents/pi/$path" "$pi_home/$path"
 done
 

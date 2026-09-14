@@ -25,11 +25,25 @@ check_link() {
   printf 'OK    %s\n' "$target"
 }
 
+check_absent() {
+  local target="$1"
+
+  if [[ -e "$target" || -L "$target" ]]; then
+    printf 'FAIL  %s should have been removed\n' "$target"
+    failures=$((failures + 1))
+    return
+  fi
+
+  printf 'OK    %s is absent\n' "$target"
+}
+
 check_link "$repo/prompts/AGENTS.md" "$pi_home/AGENTS.md"
 check_link "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
 check_link "$repo/agents/pi/models.json" "$pi_home/models.json"
 check_link "$repo/agents/pi/settings.json" "$pi_home/settings.json"
 check_link "$repo/agents/pi/themes" "$pi_home/themes"
+check_absent "$pi_home/extensions/subagents.txt"
+check_absent "$pi_home/packages"
 
 for extension in "$repo"/agents/pi/extensions/*; do
   [[ -e "$extension" ]] || continue

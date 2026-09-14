@@ -7,10 +7,8 @@
     "strict": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "@opentui/react",
     "skipLibCheck": true,
-    "types": ["node", "bun"],
+    "types": ["node"],
     "plugins": [
       {
         "name": "@effect/language-service",
@@ -21,5 +19,5 @@
       }
     ]
   },
-  "include": ["extensions/**/*.ts", "src/**/*.ts", "packages/**/*.ts"]
+  "include": ["extensions/**/*.ts", "src/**/*.ts"]
 }
