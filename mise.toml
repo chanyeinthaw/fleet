@@ -1,0 +1,32 @@
+[tools]
+bun = "latest"
+codex = "latest"
+node = "26.8.1"
+pi = "latest"
+pnpm = "latest"
+
+[tasks.bootstrap]
+description = "Install agent tools, dependencies, and configuration links"
+run = [
+  "mise install",
+  "pnpm --dir agents/pi install",
+  "./scripts/link",
+  "./scripts/check",
+]
+
+[tasks.link]
+description = "Create or repair Pi and Codex configuration links"
+run = "./scripts/link"
+
+[tasks.check]
+description = "Validate Fleet configuration and installed links"
+run = "./scripts/check"
+
+[tasks.update]
+description = "Upgrade tools and refresh agent configuration"
+run = [
+  "mise upgrade",
+  "pnpm --dir agents/pi install",
+  "./scripts/link",
+  "./scripts/check",
+]

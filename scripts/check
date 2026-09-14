@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+pi_home="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
+codex_home="${CODEX_HOME:-$HOME/.codex}"
+failures=0
+
+check_link() {
+  local source="$1"
+  local target="$2"
+
+  if [[ ! -L "$target" ]]; then
+    printf 'FAIL  %s is not a symlink\n' "$target"
+    failures=$((failures + 1))
+    return
+  fi
+
+  if [[ "$(readlink -f "$target")" != "$(readlink -f "$source")" ]]; then
+    printf 'FAIL  %s points to %s, expected %s\n' "$target" "$(readlink "$target")" "$source"
+    failures=$((failures + 1))
+    return
+  fi
+
+  printf 'OK    %s\n' "$target"
+}
+
+check_link "$repo/prompts/AGENTS.md" "$pi_home/AGENTS.md"
+check_link "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
+check_link "$repo/agents/pi/models.json" "$pi_home/models.json"
+check_link "$repo/agents/pi/settings.json" "$pi_home/settings.json"
+check_link "$repo/agents/pi/themes" "$pi_home/themes"
+
+for extension in "$repo"/agents/pi/extensions/*; do
+  [[ -e "$extension" ]] || continue
+  check_link "$extension" "$pi_home/extensions/$(basename "$extension")"
+done
+
+check_link "$repo/prompts/AGENTS.md" "$codex_home/AGENTS.md"
+check_link "$repo/agents/codex/config.toml" "$codex_home/config.toml"
+check_link "$repo/agents/codex/subagents" "$codex_home/subagents"
+
+for skill in "$repo"/prompts/skills/*; do
+  [[ -e "$skill" || -L "$skill" ]] || continue
+  name="$(basename "$skill")"
+  check_link "$skill" "$pi_home/skills/$name"
+  check_link "$skill" "$codex_home/skills/$name"
+done
+
+for profile in "$repo"/agents/codex/profiles/*.config.toml; do
+  [[ -e "$profile" ]] || continue
+  check_link "$profile" "$codex_home/$(basename "$profile")"
+done
+
+for command in mise pi codex; do
+  if command -v "$command" >/dev/null; then
+    printf 'OK    %s is installed\n' "$command"
+  else
+    printf 'FAIL  %s is not installed\n' "$command"
+    failures=$((failures + 1))
+  fi
+done
+
+if [[ ! -d "$codex_home/skills/.system" ]]; then
+  printf 'WARN  %s is missing; Codex normally creates its bundled skills here\n' "$codex_home/skills/.system"
+fi
+
+if [[ -n "${CPA_API_KEY:-}" ]]; then
+  printf 'OK    CPA_API_KEY is present\n'
+else
+  printf 'WARN  CPA_API_KEY is not present in this shell\n'
+fi
+
+if (( failures > 0 )); then
+  printf '\n%d check(s) failed. Run: mise run link\n' "$failures"
+  exit 1
+fi
+
+printf '\nFleet configuration is linked correctly.\n'

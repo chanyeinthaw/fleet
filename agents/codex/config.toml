@@ -1,0 +1,52 @@
+model = "gpt-5.6-sol"
+model_provider = "cpa"
+model_reasoning_effort = "low"
+model_context_window = 272000
+
+[features]
+hooks = true
+
+[agents]
+default_subagent_model = "ocg/muse-spark-1.3-contributor"
+default_subagent_reasoning_effort = "max"
+
+[agents.sol]
+description = "General-purpose subagent using GPT-5.6 Sol."
+config_file = "subagents/sol.toml"
+
+[agents.terra]
+description = "General-purpose subagent using GPT-5.6 Terra."
+config_file = "subagents/terra.toml"
+
+[agents.luna]
+description = "General-purpose subagent using GPT-5.6 Luna."
+config_file = "subagents/luna.toml"
+
+[agents.luna-fast]
+description = "General-purpose subagent using GPT-5.6 Luna Fast."
+config_file = "subagents/luna-fast.toml"
+
+[agents.muse13]
+description = "General-purpose subagent using Muse Spark 1.3 Contributor."
+config_file = "subagents/muse13.toml"
+
+[agents.glm53f]
+description = "General-purpose subagent using GLM 5.3 Flash."
+config_file = "subagents/glm53f.toml"
+
+[model_providers.cpa]
+name = "CLI Proxy API"
+base_url = "https://cpa1.p.si14.space/v1"
+wire_api = "responses"
+env_key = "CPA_API_KEY"
+requires_openai_auth = false
+http_headers = { "x-opencode-session" = "codex" }
+
+[projects."/home/chanyeinthaw"]
+trust_level = "trusted"
+
+[hooks.state]
+
+[hooks.state."/home/chanyeinthaw/.codex/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:5c107f7d302b905ff192a2b36f8343ebd91d0fa2e88b971aaed7834f413a8227"
+enabled = true
