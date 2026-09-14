@@ -5,6 +5,7 @@ model_context_window = 272000
 
 [features]
 hooks = true
+multi_agent_v2 = true
 
 [agents]
 default_subagent_model = "ocg/muse-spark-1.3-contributor"
