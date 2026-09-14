@@ -21,6 +21,8 @@ cd ~/fleet
 mise run bootstrap
 ```
 
+The bootstrap installs the pinned Pi and Codex versions from `mise.toml`, installs Pi's package dependencies, and links both agents' configuration.
+
 Useful commands:
 
 ```bash
