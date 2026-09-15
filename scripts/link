@@ -4,6 +4,7 @@ set -euo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 pi_home="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
+opencode_home="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 backup_root="${XDG_STATE_HOME:-$HOME/.local/state}/fleet/backups/$(date +%Y%m%d-%H%M%S)"
 
 backed_up=false
@@ -31,16 +32,6 @@ link_path() {
   printf 'Linked %s -> %s\n' "$target" "$source"
 }
 
-link_skills() {
-  local target_root="$1"
-  mkdir -p "$target_root"
-
-  for skill in "$repo"/prompts/skills/*; do
-    [[ -e "$skill" || -L "$skill" ]] || continue
-    link_path "$skill" "$target_root/$(basename "$skill")"
-  done
-}
-
 remove_managed_link() {
   local source="$1"
   local target="$2"
@@ -51,6 +42,36 @@ remove_managed_link() {
   fi
 }
 
+sync_skills() {
+  local harness="$1"
+  local target_root="$2"
+  mkdir -p "$target_root"
+
+  for skill in "$repo"/prompts/skills/*; do
+    [[ -d "$skill" ]] || continue
+    local name
+    local harnesses
+    name="$(basename "$skill")"
+    harnesses="$("$repo/scripts/skill-harnesses" "$skill/SKILL.md")"
+
+    if grep -Fxq "$harness" <<< "$harnesses"; then
+      link_path "$skill" "$target_root/$name"
+    else
+      remove_managed_link "$skill" "$target_root/$name"
+    fi
+  done
+
+  for target in "$target_root"/*; do
+    [[ -L "$target" ]] || continue
+    local source
+    source="$(readlink "$target")"
+    if [[ "$source" == "$repo/prompts/skills/"* && ! -e "$source" ]]; then
+      rm "$target"
+      printf 'Removed obsolete link %s\n' "$target"
+    fi
+  done
+}
+
 mkdir -p "$pi_home" "$codex_home"
 
 remove_managed_link "$repo/agents/pi/extensions/subagents.txt" "$pi_home/extensions/subagents.txt"
@@ -58,7 +79,7 @@ remove_managed_link "$repo/agents/pi/packages" "$pi_home/packages"
 
 link_path "$repo/prompts/AGENTS.md" "$pi_home/AGENTS.md"
 link_path "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
-link_skills "$pi_home/skills"
+sync_skills pi "$pi_home/skills"
 
 for path in \
   models.json \
@@ -83,7 +104,9 @@ link_path "$repo/prompts/AGENTS.md" "$codex_home/AGENTS.md"
 link_path "$repo/prompts/references/COMPUTERS.md" "$codex_home/COMPUTERS.md"
 link_path "$repo/agents/codex/config.toml" "$codex_home/config.toml"
 link_path "$repo/agents/codex/subagents" "$codex_home/subagents"
-link_skills "$codex_home/skills"
+sync_skills codex "$codex_home/skills"
+
+sync_skills opencode "$opencode_home/skills"
 
 for profile in "$repo"/agents/codex/profiles/*.config.toml; do
   [[ -e "$profile" ]] || continue

@@ -1,6 +1,6 @@
 # Fleet
 
-Personal coding-agent configuration shared by Pi and Codex.
+Personal coding-agent configuration shared by Pi and Codex, with per-harness skill routing.
 
 ## Layout
 
@@ -30,6 +30,17 @@ mise run link
 mise run check
 mise run update
 ```
+
+## Skill harnesses
+
+Skills opt into each harness through an inline list in `SKILL.md` frontmatter metadata:
+
+```yaml
+metadata:
+  harness: [pi, codex]
+```
+
+Supported values are `pi`, `codex`, and `opencode`. A skill without `metadata.harness` is not linked anywhere. `mise run link` adds selected links and removes obsolete Fleet-managed links, so metadata changes take effect on every run.
 
 Codex profiles are available with:
 

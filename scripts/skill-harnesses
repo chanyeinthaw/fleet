@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+skill_file="${1:?usage: skill-harnesses SKILL.md}"
+
+if [[ ! -f "$skill_file" ]]; then
+  printf 'Skill file not found: %s\n' "$skill_file" >&2
+  exit 1
+fi
+
+first_line=true
+frontmatter_closed=false
+harness_value=""
+harness_found=false
+
+while IFS= read -r line; do
+  if [[ "$first_line" == true ]]; then
+    first_line=false
+    if [[ "$line" != "---" ]]; then
+      printf 'Skill must start with YAML frontmatter: %s\n' "$skill_file" >&2
+      exit 1
+    fi
+    continue
+  fi
+
+  if [[ "$line" == "---" ]]; then
+    frontmatter_closed=true
+    break
+  fi
+
+  if [[ "$line" =~ ^[[:space:]]*harness: ]]; then
+    harness_value="${line#*harness:}"
+    harness_found=true
+  fi
+done < "$skill_file"
+
+if [[ "$frontmatter_closed" != true ]]; then
+  printf 'Skill frontmatter is not closed: %s\n' "$skill_file" >&2
+  exit 1
+fi
+
+if [[ "$harness_found" != true ]]; then
+  exit 0
+fi
+
+shopt -s extglob
+harness_value="${harness_value##+([[:space:]])}"
+harness_value="${harness_value%%+([[:space:]])}"
+
+if [[ "$harness_value" == \[*\] ]]; then
+  harness_value="${harness_value#\[}"
+  harness_value="${harness_value%\]}"
+fi
+
+IFS=',' read -ra harnesses <<< "$harness_value"
+seen=" "
+
+for harness in "${harnesses[@]}"; do
+  harness="${harness##+([[:space:]])}"
+  harness="${harness%%+([[:space:]])}"
+  harness="${harness#\"}"
+  harness="${harness%\"}"
+  harness="${harness#\'}"
+  harness="${harness%\'}"
+
+  [[ -n "$harness" ]] || continue
+
+  case "$harness" in
+    pi | codex | opencode) ;;
+    *)
+      printf 'Unknown harness "%s" in %s\n' "$harness" "$skill_file" >&2
+      exit 1
+      ;;
+  esac
+
+  if [[ "$seen" != *" $harness "* ]]; then
+    printf '%s\n' "$harness"
+    seen+="$harness "
+  fi
+done

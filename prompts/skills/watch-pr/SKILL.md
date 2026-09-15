@@ -1,6 +1,8 @@
 ---
 name: watch-pr
 description: Monitor a pull request through review and CI. Use when the user asks to monitor, watch, or babysit a PR.
+metadata:
+  harness: [pi, codex]
 ---
 
 # Watch PR

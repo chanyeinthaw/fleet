@@ -4,6 +4,7 @@ set -euo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 pi_home="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
+opencode_home="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 failures=0
 
 check_link() {
@@ -37,6 +38,48 @@ check_absent() {
   printf 'OK    %s is absent\n' "$target"
 }
 
+check_unmanaged() {
+  local source="$1"
+  local target="$2"
+
+  if [[ -L "$target" && "$(readlink "$target")" == "$source" ]]; then
+    printf 'FAIL  %s should not be linked for this harness\n' "$target"
+    failures=$((failures + 1))
+    return
+  fi
+
+  printf 'OK    %s is not managed by Fleet\n' "$target"
+}
+
+check_skills() {
+  local harness="$1"
+  local target_root="$2"
+
+  for skill in "$repo"/prompts/skills/*; do
+    [[ -d "$skill" ]] || continue
+    local name
+    local harnesses
+    name="$(basename "$skill")"
+    harnesses="$("$repo/scripts/skill-harnesses" "$skill/SKILL.md")"
+
+    if grep -Fxq "$harness" <<< "$harnesses"; then
+      check_link "$skill" "$target_root/$name"
+    else
+      check_unmanaged "$skill" "$target_root/$name"
+    fi
+  done
+
+  for target in "$target_root"/*; do
+    [[ -L "$target" ]] || continue
+    local source
+    source="$(readlink "$target")"
+    if [[ "$source" == "$repo/prompts/skills/"* && ! -e "$source" ]]; then
+      printf 'FAIL  %s points to a removed Fleet skill\n' "$target"
+      failures=$((failures + 1))
+    fi
+  done
+}
+
 check_link "$repo/prompts/AGENTS.md" "$pi_home/AGENTS.md"
 check_link "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
 check_link "$repo/agents/pi/models.json" "$pi_home/models.json"
@@ -54,12 +97,9 @@ check_link "$repo/prompts/AGENTS.md" "$codex_home/AGENTS.md"
 check_link "$repo/agents/codex/config.toml" "$codex_home/config.toml"
 check_link "$repo/agents/codex/subagents" "$codex_home/subagents"
 
-for skill in "$repo"/prompts/skills/*; do
-  [[ -e "$skill" || -L "$skill" ]] || continue
-  name="$(basename "$skill")"
-  check_link "$skill" "$pi_home/skills/$name"
-  check_link "$skill" "$codex_home/skills/$name"
-done
+check_skills pi "$pi_home/skills"
+check_skills codex "$codex_home/skills"
+check_skills opencode "$opencode_home/skills"
 
 for profile in "$repo"/agents/codex/profiles/*.config.toml; do
   [[ -e "$profile" ]] || continue

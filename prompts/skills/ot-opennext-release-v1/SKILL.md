@@ -1,6 +1,8 @@
 ---
 name: ot-opennext-release-v1
 description: Set up and verify branch-free AWS SST deployments with GitHub Actions OIDC, staging on main, and production from GitHub Releases.
+metadata:
+  harness: [pi, codex]
 disable-model-invocation: true
 compatibility: Requires git, GitHub CLI, AWS CLI, Node.js, pnpm, SST, Prisma, and MariaDB.
 ---
