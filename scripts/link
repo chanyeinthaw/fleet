@@ -77,7 +77,7 @@ mkdir -p "$pi_home" "$codex_home"
 remove_managed_link "$repo/agents/pi/extensions/subagents.txt" "$pi_home/extensions/subagents.txt"
 remove_managed_link "$repo/agents/pi/packages" "$pi_home/packages"
 
-link_path "$repo/prompts/AGENTS.md" "$pi_home/AGENTS.md"
+"$repo/scripts/agent-instructions" sync "$repo/prompts/agents/catalog.yaml" pi "$pi_home/AGENTS.md"
 link_path "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
 sync_skills pi "$pi_home/skills"
 
@@ -100,9 +100,9 @@ for extension in "$repo"/agents/pi/extensions/*; do
   link_path "$extension" "$pi_home/extensions/$(basename "$extension")"
 done
 
-link_path "$repo/prompts/AGENTS.md" "$codex_home/AGENTS.md"
+"$repo/scripts/agent-instructions" sync "$repo/prompts/agents/catalog.yaml" codex "$codex_home/AGENTS.md"
 link_path "$repo/prompts/references/COMPUTERS.md" "$codex_home/COMPUTERS.md"
-link_path "$repo/agents/codex/config.toml" "$codex_home/config.toml"
+"$repo/scripts/codex-config" sync "$repo/agents/codex/config.base.toml" "$codex_home/config.toml"
 link_path "$repo/agents/codex/subagents" "$codex_home/subagents"
 sync_skills codex "$codex_home/skills"
 

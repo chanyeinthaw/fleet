@@ -80,7 +80,7 @@ check_skills() {
   done
 }
 
-check_link "$repo/prompts/AGENTS.md" "$pi_home/AGENTS.md"
+"$repo/scripts/agent-instructions" check "$repo/prompts/agents/catalog.yaml" pi "$pi_home/AGENTS.md" || failures=$((failures + 1))
 check_link "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
 check_link "$repo/agents/pi/models.json" "$pi_home/models.json"
 check_link "$repo/agents/pi/settings.json" "$pi_home/settings.json"
@@ -93,8 +93,8 @@ for extension in "$repo"/agents/pi/extensions/*; do
   check_link "$extension" "$pi_home/extensions/$(basename "$extension")"
 done
 
-check_link "$repo/prompts/AGENTS.md" "$codex_home/AGENTS.md"
-check_link "$repo/agents/codex/config.toml" "$codex_home/config.toml"
+"$repo/scripts/agent-instructions" check "$repo/prompts/agents/catalog.yaml" codex "$codex_home/AGENTS.md" || failures=$((failures + 1))
+"$repo/scripts/codex-config" check "$repo/agents/codex/config.base.toml" "$codex_home/config.toml" || failures=$((failures + 1))
 check_link "$repo/agents/codex/subagents" "$codex_home/subagents"
 
 check_skills pi "$pi_home/skills"

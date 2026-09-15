@@ -2,6 +2,11 @@ model = "gpt-5.6-sol"
 model_provider = "cpa"
 model_reasoning_effort = "low"
 model_context_window = 272000
+developer_instructions = """
+Keep every commentary update to one short sentence.
+State only the immediate action being taken or the concrete result found.
+Do not add acknowledgements, rationale, planning ceremony, or conversational framing.
+"""
 
 [features]
 hooks = true
@@ -42,12 +47,3 @@ wire_api = "responses"
 env_key = "CPA_API_KEY"
 requires_openai_auth = false
 http_headers = { "x-opencode-session" = "codex" }
-
-[projects."/home/chanyeinthaw"]
-trust_level = "trusted"
-
-[hooks.state]
-
-[hooks.state."/home/chanyeinthaw/.codex/hooks.json:session_start:0:0"]
-trusted_hash = "sha256:5c107f7d302b905ff192a2b36f8343ebd91d0fa2e88b971aaed7834f413a8227"
-enabled = true

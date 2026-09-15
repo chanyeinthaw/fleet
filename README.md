@@ -6,11 +6,11 @@ Personal coding-agent configuration shared by Pi and Codex, with per-harness ski
 
 ```text
 agents/    Agent-specific configuration and code
-prompts/   Shared AGENTS.md, skills, and reference files
+prompts/   Composed agent instructions, skills, and reference files
 scripts/   Idempotent installation and validation scripts
 ```
 
-Runtime state remains in `~/.pi/agent` and `~/.codex`. Fleet links managed configuration into those directories without linking credentials, sessions, caches, or Codex system skills.
+Runtime state remains in `~/.pi/agent` and `~/.codex`. Fleet installs managed configuration into those directories without managing credentials, sessions, caches, or Codex system skills. Codex's `config.toml` stays machine-local. Fleet updates the managed values from `agents/codex/config.base.toml` while preserving project trust and other local state.
 
 ## Bootstrap
 
@@ -21,7 +21,9 @@ cd ~/fleet
 mise run bootstrap
 ```
 
-The bootstrap installs the pinned Pi and Codex versions from `mise.toml`, installs Pi's package dependencies, and links both agents' configuration.
+The bootstrap installs the pinned Pi and Codex versions from `mise.toml`, installs Pi's package dependencies, and installs both agents' configuration.
+
+Agent instructions are assembled in the stable order declared by `prompts/agents/catalog.yaml`. Shared sections come from `prompts/agents/*.md`; the `harness` slot selects either `harness/pi.md` or `harness/codex.md`.
 
 Useful commands:
 

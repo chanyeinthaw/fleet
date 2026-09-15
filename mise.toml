@@ -5,7 +5,7 @@ pi = "0.85.1"
 pnpm = "latest"
 
 [tasks.bootstrap]
-description = "Install agent tools, dependencies, and configuration links"
+description = "Install agent tools, dependencies, and configuration"
 run = [
   "mise install",
   "pnpm --dir agents/pi install",
@@ -14,7 +14,7 @@ run = [
 ]
 
 [tasks.link]
-description = "Create or repair Pi and Codex configuration links"
+description = "Install or refresh Pi and Codex configuration"
 run = "./scripts/link"
 
 [tasks.check]

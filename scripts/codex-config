@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""Sync Fleet-owned Codex settings without replacing machine-owned state."""
+
+from __future__ import annotations
+
+import os
+import re
+import sys
+import tempfile
+import tomllib
+from pathlib import Path
+
+
+START = "# BEGIN FLEET MANAGED CONFIG"
+END = "# END FLEET MANAGED CONFIG"
+TABLE = re.compile(r"^\s*\[\[?\s*(.*?)\s*\]\]?\s*(?:#.*)?$")
+ASSIGNMENT = re.compile(r"^\s*([A-Za-z0-9_-]+)\s*=")
+
+
+def fail(message: str) -> None:
+    print(f"FAIL  {message}", file=sys.stderr)
+    raise SystemExit(1)
+
+
+def table_root(header: str) -> str:
+    header = header.lstrip()
+    if not header:
+        return ""
+    if header[0] not in {'"', "'"}:
+        return header.split(".", 1)[0].strip()
+
+    quote = header[0]
+    escaped = False
+    for index, character in enumerate(header[1:], start=1):
+        if quote == '"' and character == "\\" and not escaped:
+            escaped = True
+            continue
+        if character == quote and not escaped:
+            return header[1:index]
+        escaped = False
+    return header
+
+
+def remove_managed_block(config: str) -> str:
+    starts = config.count(START)
+    ends = config.count(END)
+    if starts == 0 and ends == 0:
+        return config
+    if starts != 1 or ends != 1:
+        fail("Codex config has malformed Fleet markers")
+
+    before, remainder = config.split(START, 1)
+    _, after = remainder.split(END, 1)
+    return before.rstrip() + "\n" + after.lstrip("\n")
+
+
+def unmanaged_sections(config: str, managed_roots: set[str]) -> tuple[str, str]:
+    root_lines: list[str] = []
+    table_lines: list[str] = []
+    current_root: str | None = None
+
+    for line in config.splitlines(keepends=True):
+        match = TABLE.match(line)
+        if match:
+            current_root = table_root(match.group(1))
+
+        if current_root is not None:
+            if current_root not in managed_roots:
+                table_lines.append(line)
+            continue
+
+        assignment = ASSIGNMENT.match(line)
+        if assignment and assignment.group(1) in managed_roots:
+            continue
+        root_lines.append(line)
+
+    return "".join(root_lines).strip(), "".join(table_lines).strip()
+
+
+def render(base: str, existing: str) -> str:
+    try:
+        managed_roots = set(tomllib.loads(base))
+        tomllib.loads(existing)
+    except tomllib.TOMLDecodeError as error:
+        fail(f"invalid TOML: {error}")
+
+    local = remove_managed_block(existing)
+    root, tables = unmanaged_sections(local, managed_roots)
+    parts = [part for part in (root, START + "\n" + base.strip() + "\n" + END, tables) if part]
+    result = "\n\n".join(parts) + "\n"
+
+    try:
+        tomllib.loads(result)
+    except tomllib.TOMLDecodeError as error:
+        fail(f"merged Codex config would be invalid TOML: {error}")
+    return result
+
+
+def sync(base_path: Path, target_path: Path) -> None:
+    base = base_path.read_text()
+    existing = target_path.read_text() if target_path.exists() else ""
+    merged = render(base, existing)
+
+    if not target_path.is_symlink() and existing == merged:
+        print(f"Unchanged {target_path}")
+        return
+
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    mode = target_path.stat().st_mode & 0o777 if target_path.exists() else 0o600
+    descriptor, temporary_name = tempfile.mkstemp(dir=target_path.parent)
+    temporary_path = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w") as temporary:
+            temporary.write(merged)
+        os.chmod(temporary_path, mode)
+        os.replace(temporary_path, target_path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+    print(f"Updated {target_path} from {base_path}")
+
+
+def check(base_path: Path, target_path: Path) -> None:
+    if target_path.is_symlink():
+        fail(f"{target_path} should be a machine-local file, not a symlink")
+    if not target_path.is_file():
+        fail(f"{target_path} is missing")
+
+    base = base_path.read_text().strip()
+    config = target_path.read_text()
+    expected_block = START + "\n" + base + "\n" + END
+    if config.count(START) != 1 or config.count(END) != 1 or expected_block not in config:
+        fail(f"{target_path} does not contain the current Fleet base config")
+
+    try:
+        tomllib.loads(config)
+    except tomllib.TOMLDecodeError as error:
+        fail(f"{target_path} is invalid TOML: {error}")
+    print(f"OK    {target_path}")
+
+
+def main() -> None:
+    if len(sys.argv) != 4 or sys.argv[1] not in {"sync", "check"}:
+        fail(f"usage: {Path(sys.argv[0]).name} sync|check BASE TARGET")
+
+    action, base_name, target_name = sys.argv[1:]
+    base_path = Path(base_name)
+    target_path = Path(target_name)
+    if action == "sync":
+        sync(base_path, target_path)
+    else:
+        check(base_path, target_path)
+
+
+if __name__ == "__main__":
+    main()

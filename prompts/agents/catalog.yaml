@@ -1,0 +1,26 @@
+order:
+  - identity
+  - coding-general
+  - coding-typescript
+  - questions
+  - ceremony
+  - visual-design
+  - blast-radius
+  - pull-requests
+  - harness
+  - computers
+
+sections:
+  identity: identity.md
+  coding-general: coding-general.md
+  coding-typescript: coding-typescript.md
+  questions: questions.md
+  ceremony: ceremony.md
+  visual-design: visual-design.md
+  blast-radius: blast-radius.md
+  pull-requests: pull-requests.md
+  computers: computers.md
+
+harness:
+  pi: harness/pi.md
+  codex: harness/codex.md
