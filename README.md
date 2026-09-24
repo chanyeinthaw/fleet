@@ -21,7 +21,7 @@ cd ~/fleet
 mise run bootstrap
 ```
 
-The bootstrap installs the pinned Pi and Codex versions from `mise.toml`, installs Pi's package dependencies, and installs both agents' configuration.
+The bootstrap installs the pinned Pi and Codex versions from `mise.toml`, activates both tools in mise's global config so they work outside this repository, installs Pi's package dependencies, and installs both agents' configuration.
 
 Agent instructions are assembled in the stable order declared by `prompts/agents/catalog.yaml`. Shared sections come from `prompts/agents/*.md`; the `harness` slot selects either `harness/pi.md` or `harness/codex.md`.
 
