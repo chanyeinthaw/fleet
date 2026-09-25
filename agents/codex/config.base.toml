@@ -17,27 +17,27 @@ default_subagent_model = "ocg/muse-spark-1.3-contributor"
 default_subagent_reasoning_effort = "max"
 
 [agents.sol]
-description = "General-purpose subagent using GPT-5.6 Sol."
+description = "Strong but expensive subagent, well rounded in all areas except for UI/UX. Opt-in only."
 config_file = "subagents/sol.toml"
 
 [agents.terra]
-description = "General-purpose subagent using GPT-5.6 Terra."
+description = "Code review focused subagent."
 config_file = "subagents/terra.toml"
 
 [agents.luna]
-description = "General-purpose subagent using GPT-5.6 Luna."
+description = "Secondary workhorse subagent when primary is not available."
 config_file = "subagents/luna.toml"
 
 [agents.luna-fast]
-description = "General-purpose subagent using GPT-5.6 Luna Fast."
+description = "Secondary workhorse subagent when primary is not available (Fast mode)."
 config_file = "subagents/luna-fast.toml"
 
 [agents.muse13]
-description = "General-purpose subagent using Muse Spark 1.3 Contributor."
+description = "Primary work horse subagent."
 config_file = "subagents/muse13.toml"
 
 [agents.glm53f]
-description = "General-purpose subagent using GLM 5.3 Flash."
+description = "UI/UX focused, general-purpose subagent."
 config_file = "subagents/glm53f.toml"
 
 [model_providers.cpa]
