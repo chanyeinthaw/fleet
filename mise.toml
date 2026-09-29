@@ -1,14 +1,8 @@
-[tools]
-"npm:@openai/codex" = "0.154.0"
-node = "26.8.1"
-pi = "0.85.1"
-pnpm = "latest"
-
 [tasks.bootstrap]
 description = "Install agent tools, dependencies, and configuration"
 run = [
   "mise install",
-  "mise use --global npm:@openai/codex@0.154.0 pi@0.85.1",
+  "mise use --global npm:@openai/codex@0.158.0 pi@0.85.1",
   "pnpm --dir agents/pi install",
   "./scripts/link",
   "./scripts/check",
@@ -26,7 +20,7 @@ run = "./scripts/check"
 description = "Upgrade tools and refresh agent configuration"
 run = [
   "mise upgrade",
-  "mise use --global npm:@openai/codex@0.154.0 pi@0.85.1",
+  "mise use --global npm:@openai/codex@0.158.0 pi@0.85.1",
   "pnpm --dir agents/pi install",
   "./scripts/link",
   "./scripts/check",
