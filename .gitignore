@@ -13,3 +13,4 @@ dist/
 
 # Secrets
 **/auth.json
+agents/pi/themes/omarchy-system.json
