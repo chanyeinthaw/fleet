@@ -6,7 +6,7 @@
       "apiKey": "$CPA_API_KEY",
       "models": [
         {
-          "id": "gpt-5.6-sol",
+          "id": "gpt-6-sol",
           "name": "Sol",
           "reasoning": true,
           "maxTokens": 128000,
@@ -40,7 +40,7 @@
           }
         },
         {
-          "id": "gpt-5.6-luna",
+          "id": "gpt-6-luna",
           "name": "Luna",
           "reasoning": true,
           "maxTokens": 128000,
@@ -57,7 +57,7 @@
           }
         },
         {
-          "id": "gpt-5.6-luna-fast",
+          "id": "gpt-6-luna-fast",
           "name": "Luna ⚡︎",
           "reasoning": true,
           "maxTokens": 128000,
