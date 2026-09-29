@@ -1,6 +1,6 @@
 # Fleet
 
-Personal coding-agent configuration shared by Pi and Codex, with per-harness skill routing.
+Personal coding-agent configuration shared by Pi, Codex, and Claude Code, with per-harness skill routing.
 
 ## Layout
 
@@ -10,20 +10,24 @@ prompts/   Composed agent instructions, skills, and reference files
 scripts/   Idempotent installation and validation scripts
 ```
 
-Runtime state remains in `~/.pi/agent` and `~/.codex`. Fleet installs managed configuration into those directories without managing credentials, sessions, caches, or Codex system skills. Codex's `config.toml` stays machine-local. Fleet updates the managed values from `agents/codex/config.base.toml` while preserving project trust and other local state.
+Runtime state remains in `~/.pi/agent`, `~/.codex`, and `~/.claude`. Fleet installs managed configuration into those directories without managing credentials, sessions, caches, or Codex system skills. Codex's `config.toml` and Claude Code's `settings.json` stay machine-local. Fleet updates their managed values while preserving other local settings.
 
 ## Bootstrap
 
-`CPA_API_KEY` is machine-owned state. It must be exported by the machine environment or secret manager used to launch Pi or Codex. Fleet does not provision or store its value.
+`CPA_API_KEY` is machine-owned state. It must be exported by the machine environment or secret manager used to launch Pi, Codex, or Claude Code. Fleet does not provision or store its value. Claude Code reads it through `apiKeyHelper` and uses CPA's Anthropic-compatible endpoint with `gpt-6-sol` as its default model. No Claude subscription is required.
 
 ```bash
 cd ~/fleet
 mise run bootstrap
 ```
 
-The bootstrap installs the pinned Pi and Codex versions from `mise.toml`, activates both tools in mise's global config so they work outside this repository, installs Pi's package dependencies, and installs both agents' configuration.
+The bootstrap installs the Pi, Codex, and Claude Code versions declared once in the `tools` task in `mise.toml`, activates them in mise's global config, installs Pi's package dependencies, and installs all three agents' configuration. `mise run update` uses the same tool versions.
 
-Agent instructions are assembled in the stable order declared by `prompts/agents/catalog.yaml`. Shared sections come from `prompts/agents/*.md`; the `harness` slot selects either `harness/pi.md` or `harness/codex.md`.
+Agent instructions are assembled in the stable order declared by `prompts/agents/catalog.yaml`. Shared sections come from `prompts/agents/*.md`; the `harness` slot selects the agent-specific instructions for Pi, Codex, or Claude Code.
+
+Claude Code reads project `AGENTS.md` files directly. Fleet also installs a Claude plugin that lists skills from `.agents/skills/` at session start. Claude reads a matching `SKILL.md` when needed; these project skills are available to the agent but do not become slash commands. The plugin leaves project files untouched.
+
+Fleet installs Claude subagents in `~/.claude/agents`: `reviewer` uses `gpt-6-sol` at low effort, while `explorer` and `worker` use `gpt-6-luna` at xhigh effort. Reviewer and explorer are read-only.
 
 Useful commands:
 
@@ -39,10 +43,10 @@ Skills opt into each harness through an inline list in `SKILL.md` frontmatter me
 
 ```yaml
 metadata:
-  harness: [pi, codex]
+  harness: [pi, codex, claude]
 ```
 
-Supported values are `pi`, `codex`, and `opencode`. A skill without `metadata.harness` is not linked anywhere. `mise run link` adds selected links and removes obsolete Fleet-managed links, so metadata changes take effect on every run.
+Supported values are `pi`, `codex`, `claude`, and `opencode`. A skill without `metadata.harness` is not linked anywhere. `mise run link` adds selected links and removes obsolete Fleet-managed links, so metadata changes take effect on every run.
 
 Codex profiles are available with:
 

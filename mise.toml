@@ -1,15 +1,18 @@
+[tasks.tools]
+description = "Install and activate Fleet's CLI versions"
+run = "mise use --global npm:@openai/codex@0.158.0 pi@0.85.1 claude@2.1.284"
+
 [tasks.bootstrap]
 description = "Install agent tools, dependencies, and configuration"
 run = [
-  "mise install",
-  "mise use --global npm:@openai/codex@0.158.0 pi@0.85.1",
+  "mise run tools",
   "pnpm --dir agents/pi install",
   "./scripts/link",
   "./scripts/check",
 ]
 
 [tasks.link]
-description = "Install or refresh Pi and Codex configuration"
+description = "Install or refresh agent configuration"
 run = "./scripts/link"
 
 [tasks.check]
@@ -17,10 +20,9 @@ description = "Validate Fleet configuration and installed links"
 run = "./scripts/check"
 
 [tasks.update]
-description = "Upgrade tools and refresh agent configuration"
+description = "Refresh agent tools and configuration"
 run = [
-  "mise upgrade",
-  "mise use --global npm:@openai/codex@0.158.0 pi@0.85.1",
+  "mise run tools",
   "pnpm --dir agents/pi install",
   "./scripts/link",
   "./scripts/check",

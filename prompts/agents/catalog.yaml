@@ -24,3 +24,4 @@ sections:
 harness:
   pi: harness/pi.md
   codex: harness/codex.md
+  claude: harness/claude.md

@@ -2,7 +2,7 @@
 name: make-document
 description: Create polished, standalone, navigable HTML research documents, technical reports, architecture proposals, cost analyses, performance reports, and engineering decision briefs. Use when findings or recommendations should become a formal browser-readable and print-friendly document.
 metadata:
-  harness: [pi, codex]
+  harness: [pi, codex, claude]
 ---
 
 # Make Document

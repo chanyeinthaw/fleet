@@ -4,6 +4,7 @@ set -euo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 pi_home="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
+claude_home="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 opencode_home="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 failures=0
 
@@ -96,9 +97,18 @@ done
 "$repo/scripts/agent-instructions" check "$repo/prompts/agents/catalog.yaml" codex "$codex_home/AGENTS.md" || failures=$((failures + 1))
 "$repo/scripts/codex-config" check "$repo/agents/codex/config.base.toml" "$codex_home/config.toml" || failures=$((failures + 1))
 check_link "$repo/agents/codex/subagents" "$codex_home/subagents"
+"$repo/scripts/agent-instructions" check "$repo/prompts/agents/catalog.yaml" claude "$claude_home/CLAUDE.md" || failures=$((failures + 1))
+check_link "$repo/prompts/references/COMPUTERS.md" "$claude_home/COMPUTERS.md"
+"$repo/scripts/claude-config" check "$repo/agents/claude/settings.base.json" "$claude_home/settings.json" || failures=$((failures + 1))
 
 check_skills pi "$pi_home/skills"
 check_skills codex "$codex_home/skills"
+check_skills claude "$claude_home/skills"
+check_link "$repo/agents/claude/plugins/project-skills" "$claude_home/skills/fleet-project-skills"
+for agent in "$repo"/agents/claude/agents/*.md; do
+  [[ -e "$agent" ]] || continue
+  check_link "$agent" "$claude_home/agents/$(basename "$agent")"
+done
 check_skills opencode "$opencode_home/skills"
 
 for profile in "$repo"/agents/codex/profiles/*.config.toml; do
@@ -106,7 +116,7 @@ for profile in "$repo"/agents/codex/profiles/*.config.toml; do
   check_link "$profile" "$codex_home/$(basename "$profile")"
 done
 
-for command in mise pi codex; do
+for command in mise pi codex claude; do
   if command -v "$command" >/dev/null; then
     printf 'OK    %s is installed\n' "$command"
   else

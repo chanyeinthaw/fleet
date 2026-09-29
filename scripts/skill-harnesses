@@ -66,7 +66,7 @@ for harness in "${harnesses[@]}"; do
   [[ -n "$harness" ]] || continue
 
   case "$harness" in
-    pi | codex | opencode) ;;
+    pi | codex | claude | opencode) ;;
     *)
       printf 'Unknown harness "%s" in %s\n' "$harness" "$skill_file" >&2
       exit 1

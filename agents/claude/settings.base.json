@@ -1,0 +1,47 @@
+{
+  "model": "gpt-6-sol",
+  "modelPicker": {
+    "options": [
+      {
+        "model": "gpt-6-sol",
+        "label": "Sol",
+        "behavesAs": "claude-opus-5-5"
+      },
+      {
+        "model": "gpt-6-luna",
+        "label": "Luna",
+        "behavesAs": "claude-sonnet-5-5"
+      }
+    ]
+  },
+  "apiKeyHelper": "printenv CPA_API_KEY",
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://cpa1.p.si14.space",
+    "CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS": "1"
+  },
+  "permissions": {
+    "deny": [
+      "EnterPlanMode",
+      "ExitPlanMode",
+      "DesignSync",
+      "NotebookEdit",
+      "SendMessage",
+      "PushNotification",
+      "RemoteTrigger",
+      "ReportFindings",
+      "ScheduleWakeup",
+      "AskUserQuestion",
+      "CronCreate",
+      "CronDelete",
+      "CronList",
+      "Agent(general-purpose)",
+      "Agent(claude)",
+      "Agent(statusline-setup)"
+    ]
+  },
+  "disableBundledSkills": true,
+  "disableWorkflows": true,
+  "disableRemoteControl": true,
+  "disableClaudeAiConnectors": true,
+  "enableArtifact": false
+}

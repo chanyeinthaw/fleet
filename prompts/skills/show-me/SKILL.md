@@ -2,7 +2,7 @@
 name: show-me
 description: Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.
 metadata:
-  harness: [pi, codex]
+  harness: [pi, codex, claude]
 ---
 
 Help the user understand the current topic of conversation visually. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.

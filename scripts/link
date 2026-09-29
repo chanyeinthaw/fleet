@@ -4,6 +4,7 @@ set -euo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 pi_home="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
+claude_home="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 opencode_home="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 backup_root="${XDG_STATE_HOME:-$HOME/.local/state}/fleet/backups/$(date +%Y%m%d-%H%M%S)"
 
@@ -72,7 +73,7 @@ sync_skills() {
   done
 }
 
-mkdir -p "$pi_home" "$codex_home"
+mkdir -p "$pi_home" "$codex_home" "$claude_home"
 
 remove_managed_link "$repo/agents/pi/extensions/subagents.txt" "$pi_home/extensions/subagents.txt"
 remove_managed_link "$repo/agents/pi/packages" "$pi_home/packages"
@@ -105,6 +106,16 @@ link_path "$repo/prompts/references/COMPUTERS.md" "$codex_home/COMPUTERS.md"
 "$repo/scripts/codex-config" sync "$repo/agents/codex/config.base.toml" "$codex_home/config.toml"
 link_path "$repo/agents/codex/subagents" "$codex_home/subagents"
 sync_skills codex "$codex_home/skills"
+
+"$repo/scripts/agent-instructions" sync "$repo/prompts/agents/catalog.yaml" claude "$claude_home/CLAUDE.md"
+link_path "$repo/prompts/references/COMPUTERS.md" "$claude_home/COMPUTERS.md"
+"$repo/scripts/claude-config" sync "$repo/agents/claude/settings.base.json" "$claude_home/settings.json"
+sync_skills claude "$claude_home/skills"
+link_path "$repo/agents/claude/plugins/project-skills" "$claude_home/skills/fleet-project-skills"
+for agent in "$repo"/agents/claude/agents/*.md; do
+  [[ -e "$agent" ]] || continue
+  link_path "$agent" "$claude_home/agents/$(basename "$agent")"
+done
 
 sync_skills opencode "$opencode_home/skills"
 
