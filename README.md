@@ -48,6 +48,8 @@ metadata:
 
 Supported values are `pi`, `codex`, `claude`, and `opencode`. A skill without `metadata.harness` is not linked anywhere. `mise run link` adds selected links and removes obsolete Fleet-managed links, so metadata changes take effect on every run.
 
+Wayfinder and its companion skills (`setup-matt-pocock-skills`, `domain-modeling`, `research`, and `prototype`) are vendored from [mattpocock/skills](https://github.com/mattpocock/skills/tree/d81f3a183412e71a5b1e84ca21bc1a35eea03a60) at `d81f3a1`, with only Fleet's harness metadata added. Wayfinder uses Fleet's existing `grilling` skill. The upstream MIT license is in `prompts/skills/MATT-POCOCK-LICENSE`. After linking, run `/setup-matt-pocock-skills` in each repository where you want to use `/wayfinder`; it asks before writing repository-specific issue tracker and domain settings.
+
 Codex profiles are available with:
 
 ```bash
