@@ -16,7 +16,9 @@
   },
   "apiKeyHelper": "printenv CPA_API_KEY",
   "attribution": {
-    "commit": ""
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
   },
   "env": {
     "ANTHROPIC_BASE_URL": "https://cpa1.p.si14.space",
