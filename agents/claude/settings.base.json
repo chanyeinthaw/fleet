@@ -14,7 +14,7 @@
       }
     ]
   },
-  "apiKeyHelper": "printenv CPA_API_KEY",
+  "apiKeyHelper": "\"$HOME/.local/bin/fleet-cpa-key\"",
   "attribution": {
     "commit": "",
     "pr": "",

@@ -33,6 +33,10 @@ run = "./scripts/link"
 description = "Validate Fleet configuration and installed links"
 run = "./scripts/check"
 
+[tasks."cpa:warm"]
+description = "Unlock GPG if needed and cache the CPA key for this boot"
+run = "./scripts/cpa-key warm"
+
 [tasks.update]
 description = "Refresh agent tools and configuration"
 run = [

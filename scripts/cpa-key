@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""Supply the CPA key to agents, caching only this secret for the current boot."""
+
+import argparse
+import fcntl
+import json
+import os
+from pathlib import Path
+import platform
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+
+
+SECRET = "agents/cpa1-api-key"
+
+
+def runtime_directory() -> Path:
+    if platform.system() == "Darwin":
+        # getconf also works for services that do not inherit a shell's TMPDIR.
+        runtime = subprocess.check_output(
+            ["/usr/bin/getconf", "DARWIN_USER_TEMP_DIR"], text=True
+        ).strip()
+    else:
+        runtime = os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
+    parent = Path(runtime)
+    if not parent.is_absolute() or not parent.is_dir() or parent.stat().st_uid != os.getuid():
+        raise RuntimeError("No user runtime directory is available")
+    return parent / "fleet"
+
+
+def boot_id() -> str:
+    if platform.system() == "Darwin":
+        return subprocess.check_output(
+            ["/usr/sbin/sysctl", "-n", "kern.boottime"], text=True
+        ).strip()
+    return Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+
+
+def validate_private(info: os.stat_result, mode: int) -> None:
+    if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != mode:
+        raise RuntimeError("CPA cache must be owned by you with owner-only permissions")
+
+
+def private_file(path: Path, create: bool = False) -> int:
+    flags = os.O_RDWR if create else os.O_RDONLY
+    if create:
+        flags |= os.O_CREAT
+    descriptor = os.open(path, flags | os.O_NOFOLLOW, 0o600)
+    try:
+        info = os.fstat(descriptor)
+        validate_private(info, 0o600)
+        if not stat.S_ISREG(info.st_mode):
+            raise RuntimeError("CPA cache must be a regular file")
+        return descriptor
+    except BaseException:
+        os.close(descriptor)
+        raise
+
+
+def cached_key(path: Path, boot: str) -> str | None:
+    try:
+        descriptor = private_file(path)
+    except FileNotFoundError:
+        return None
+    with os.fdopen(descriptor) as file:
+        try:
+            value = json.load(file)
+        except json.JSONDecodeError:
+            path.unlink()
+            return None
+    if not isinstance(value, dict) or value.get("boot") != boot:
+        path.unlink()
+        return None
+    key = value.get("key")
+    if not isinstance(key, str) or not key or any(c.isspace() for c in key):
+        path.unlink()
+        return None
+    return key
+
+
+def decrypt_key() -> str:
+    # Prefer Fleet's mise shim so desktop/user services need no shell activation.
+    shim = Path.home() / ".local/share/mise/shims/gopass"
+    command = str(shim) if shim.is_file() else shutil.which("gopass")
+    if not command:
+        raise RuntimeError("gopass is missing; run mise run tools in Fleet")
+    result = subprocess.run(
+        [command, "show", "--noparsing", SECRET], capture_output=True, text=True
+    )
+    if result.returncode:
+        # Provider errors may include secret content, so do not relay their output.
+        raise RuntimeError(f"Cannot decrypt {SECRET}; unlock GPG and run fleet-cpa-key warm")
+    key = result.stdout.strip()
+    if not key or any(c.isspace() for c in key):
+        raise RuntimeError(f"{SECRET} must contain one nonempty API key")
+    return key
+
+
+def write_cache(path: Path, boot: str, key: str) -> None:
+    descriptor, name = tempfile.mkstemp(prefix=".cpa-key-", dir=path.parent)
+    temporary = Path(name)
+    try:
+        with os.fdopen(descriptor, "w") as file:
+            json.dump({"boot": boot, "key": key}, file)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def run(action: str) -> None:
+    directory = runtime_directory()
+    directory.mkdir(mode=0o700, exist_ok=True)
+    info = directory.lstat()
+    validate_private(info, 0o700)
+    if not stat.S_ISDIR(info.st_mode):
+        raise RuntimeError("CPA cache directory must not be a symlink")
+    path = directory / "cpa1-api-key"
+    with os.fdopen(private_file(directory / ".cpa-key.lock", create=True), "r+") as lock:
+        # Serialize concurrent Claude/Codex requests and cache refresh/clear.
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if action == "clear":
+            path.unlink(missing_ok=True)
+            print("CPA key cache cleared")
+            return
+        boot = boot_id()
+        key = cached_key(path, boot)
+        if action == "status":
+            print("CPA key cached for this boot" if key else "CPA key is not cached")
+            return
+        if key is None or action == "refresh":
+            key = decrypt_key()
+            write_cache(path, boot, key)
+        if action == "get":
+            print(key)
+        else:
+            print("CPA key cached for this boot")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", nargs="?", default="get",
+                        choices=["get", "warm", "refresh", "clear", "status"])
+    args = parser.parse_args()
+    try:
+        run(args.action)
+    except (OSError, RuntimeError, subprocess.SubprocessError):
+        # Do not print exceptions that might contain cache or subprocess output.
+        print("CPA key unavailable; check cache permissions, gopass, and GPG, then run fleet-cpa-key warm", file=sys.stderr)
+        raise SystemExit(1)
+
+
+if __name__ == "__main__":
+    main()

@@ -3,7 +3,7 @@
     "openai-multi": {
       "baseUrl": "https://cpa1.p.si14.space/v1",
       "api": "openai-completions",
-      "apiKey": "$CPA_API_KEY",
+      "apiKey": "!\"$HOME/.local/bin/fleet-cpa-key\"",
       "models": [
         {
           "id": "gpt-6.1-sol",

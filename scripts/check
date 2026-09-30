@@ -120,7 +120,9 @@ for target in "$codex_home"/*.config.toml; do
   fi
 done
 
-for command in mise pi codex claude; do
+check_link "$repo/scripts/cpa-key" "$HOME/.local/bin/fleet-cpa-key"
+
+for command in mise pi codex claude gopass; do
   if command -v "$command" >/dev/null; then
     printf 'OK    %s is installed\n' "$command"
   else
@@ -133,11 +135,7 @@ if [[ ! -d "$codex_home/skills/.system" ]]; then
   printf 'WARN  %s is missing; Codex normally creates its bundled skills here\n' "$codex_home/skills/.system"
 fi
 
-if [[ -n "${CPA_API_KEY:-}" ]]; then
-  printf 'OK    CPA_API_KEY is present\n'
-else
-  printf 'WARN  CPA_API_KEY is not present in this shell\n'
-fi
+"$repo/scripts/cpa-key" status || failures=$((failures + 1))
 
 if (( failures > 0 )); then
   printf '\n%d check(s) failed. Run: mise run link\n' "$failures"

@@ -74,6 +74,7 @@ sync_skills() {
 }
 
 mkdir -p "$pi_home" "$codex_home" "$claude_home"
+link_path "$repo/scripts/cpa-key" "$HOME/.local/bin/fleet-cpa-key"
 
 remove_managed_link "$repo/agents/pi/extensions/subagents.txt" "$pi_home/extensions/subagents.txt"
 remove_managed_link "$repo/agents/pi/packages" "$pi_home/packages"

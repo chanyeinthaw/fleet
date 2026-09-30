@@ -16,7 +16,7 @@ Runtime state remains in `~/.pi/agent`, `~/.codex`, and `~/.claude`. Fleet insta
 
 ## Bootstrap
 
-`CPA_API_KEY` must be exported by the machine environment or secret manager used to launch Pi, Codex, or Claude Code. Fleet does not provision this key. Claude Code reads it through `apiKeyHelper` and uses CPA's Anthropic-compatible endpoint with `gpt-6.1-sol` as its default model. No Claude subscription is required.
+Pi, Codex, and Claude Code retrieve the CPA key through Fleet's `fleet-cpa-key` helper, including when launched by T3 Code. No `CPA_API_KEY` shell export is needed. Claude Code uses CPA's Anthropic-compatible endpoint with `gpt-6.1-sol` as its default model. No Claude subscription is required.
 
 ```bash
 cd ~/fleet
@@ -52,6 +52,29 @@ gopass insert --multiline jp-mirai/example-ssh-key
 ```
 
 `gopass config mounts.path` shows the configured store. Running Fleet's tools task sets Fleet as the root store and disables gopass's automatic sync and push because Fleet manages Git. Other gopass settings and mounts are preserved.
+
+### CPA key cache
+
+Add the key once through gopass's hidden prompt, then warm the cache:
+
+```bash
+gopass insert agents/cpa1-api-key
+mise run cpa:warm
+```
+
+Bootstrap and update install the helper at `~/.local/bin/fleet-cpa-key` and configure each agent to call it. The first request decrypts `agents/cpa1-api-key` and caches it for the current boot. GPG's passphrase timeout is unchanged; other secrets still require GPG access after it expires. `mise run check` reports cache status without decrypting or printing the key.
+
+After reboot, run `mise run cpa:warm` from Fleet to unlock GPG if needed and prepare the cache before launching an agent.
+
+Linux uses `$XDG_RUNTIME_DIR/fleet/`, falling back to `/run/user/<uid>/fleet/` for services without that variable. macOS uses the user's temporary directory reported by `getconf DARWIN_USER_TEMP_DIR`, the same directory normally used for `$TMPDIR`. This keeps terminal and service launches on the same cache. The helper records the boot identity and rejects earlier-boot caches, since macOS temporary files may survive reboot. The directory has mode `0700` and cache files have mode `0600`.
+
+```bash
+~/.local/bin/fleet-cpa-key status   # No decryption or key output
+~/.local/bin/fleet-cpa-key refresh  # Reload after rotating the gopass entry
+~/.local/bin/fleet-cpa-key clear    # Remove the cached key
+```
+
+The cache contains the decrypted CPA key until cleared or invalidated at the next boot. Screen lock does not clear it, and processes running as your user can read it. Agents may also cache credentials in memory; restart their sessions after rotation or when removing access. Calling the helper without an action prints the key for the consuming agent; use `warm` or `status` interactively.
 
 Use secrets by piping them into the command that needs them. Avoid printing decrypted values into agent output:
 
