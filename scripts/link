@@ -119,9 +119,13 @@ done
 
 sync_skills opencode "$opencode_home/skills"
 
-for profile in "$repo"/agents/codex/profiles/*.config.toml; do
-  [[ -e "$profile" ]] || continue
-  link_path "$profile" "$codex_home/$(basename "$profile")"
+for target in "$codex_home"/*.config.toml; do
+  [[ -L "$target" ]] || continue
+  source="$(readlink "$target")"
+  if [[ "$source" == "$repo/agents/codex/profiles/"* && ! -e "$source" ]]; then
+    rm "$target"
+    printf 'Removed obsolete link %s\n' "$target"
+  fi
 done
 
 if [[ "$backed_up" == true ]]; then

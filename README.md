@@ -50,15 +50,4 @@ Supported values are `pi`, `codex`, `claude`, and `opencode`. A skill without `m
 
 Wayfinder and its companion skills (`setup-matt-pocock-skills`, `domain-modeling`, `research`, `prototype`, `to-spec`, and `to-tickets`) are vendored from [mattpocock/skills](https://github.com/mattpocock/skills/tree/d81f3a183412e71a5b1e84ca21bc1a35eea03a60) at `d81f3a1`, with only Fleet's harness metadata added. Wayfinder uses Fleet's existing `grilling` skill. The upstream MIT license is in `prompts/skills/MATT-POCOCK-LICENSE`. After linking, run `/setup-matt-pocock-skills` in each repository where you want to use `/wayfinder`, `/to-spec`, or `/to-tickets`; it asks before writing repository-specific issue tracker and domain settings.
 
-Codex profiles are available with:
-
-```bash
-codex --profile sol
-codex --profile terra
-codex --profile luna
-codex --profile luna-fast
-codex --profile muse13
-codex --profile glm53f
-```
-
-Spawned Codex agents default to `ocg/muse-spark-1.3-contributor` at `max` reasoning. Every Codex profile is also available as a named subagent: `sol`, `terra`, `luna`, `luna-fast`, `muse13`, and `glm53f`.
+Codex and Claude Code share three named subagent roles: `explorer` investigates code without editing, `reviewer` checks changes without editing, and `worker` implements scoped changes. Explorer and worker use Luna at `xhigh` reasoning; reviewer uses Sol at `low` reasoning.

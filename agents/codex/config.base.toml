@@ -12,33 +12,17 @@ Do not add acknowledgements, rationale, planning ceremony, or conversational fra
 hooks = true
 multi_agent_v2 = true
 
-[agents]
-default_subagent_model = "ocg/muse-spark-1.3-contributor"
-default_subagent_reasoning_effort = "max"
+[agents.explorer]
+description = "Answer focused codebase questions by locating relevant code and tracing behavior."
+config_file = "subagents/explorer.toml"
 
-[agents.sol]
-description = "Strong but expensive subagent, well rounded in all areas except for UI/UX. Opt-in only."
-config_file = "subagents/sol.toml"
+[agents.reviewer]
+description = "Review code changes for concrete bugs, regressions, and missing safeguards."
+config_file = "subagents/reviewer.toml"
 
-[agents.terra]
-description = "Code review focused subagent."
-config_file = "subagents/terra.toml"
-
-[agents.luna]
-description = "Secondary workhorse subagent when primary is not available."
-config_file = "subagents/luna.toml"
-
-[agents.luna-fast]
-description = "Secondary workhorse subagent when primary is not available (Fast mode)."
-config_file = "subagents/luna-fast.toml"
-
-[agents.muse13]
-description = "Primary work horse subagent."
-config_file = "subagents/muse13.toml"
-
-[agents.glm53f]
-description = "UI/UX focused, general-purpose subagent."
-config_file = "subagents/glm53f.toml"
+[agents.worker]
+description = "Implement a scoped code change and verify the result."
+config_file = "subagents/worker.toml"
 
 [model_providers.cpa]
 name = "CLI Proxy API"

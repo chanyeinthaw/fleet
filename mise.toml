@@ -1,6 +1,6 @@
 [tasks.tools]
 description = "Install and activate Fleet's CLI versions"
-run = "mise use --global npm:@openai/codex@0.158.0 pi@0.85.1 claude@2.1.284"
+run = "mise use --global npm:@openai/codex@0.159.2 pi@0.85.1 claude@2.1.285"
 
 [tasks.bootstrap]
 description = "Install agent tools, dependencies, and configuration"

@@ -1,0 +1,7 @@
+model = "gpt-6.1-sol"
+model_reasoning_effort = "low"
+model_context_window = 272000
+sandbox_mode = "read-only"
+developer_instructions = """
+Review the requested changes without editing files. Report actionable findings with file and line references, ordered by severity. Explain the failure path and its impact. If you find no issue, say so briefly.
+"""

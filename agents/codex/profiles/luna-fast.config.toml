@@ -1,3 +1,0 @@
-model = "gpt-6-luna-fast"
-model_reasoning_effort = "max"
-model_context_window = 272000

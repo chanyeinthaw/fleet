@@ -111,9 +111,13 @@ for agent in "$repo"/agents/claude/agents/*.md; do
 done
 check_skills opencode "$opencode_home/skills"
 
-for profile in "$repo"/agents/codex/profiles/*.config.toml; do
-  [[ -e "$profile" ]] || continue
-  check_link "$profile" "$codex_home/$(basename "$profile")"
+for target in "$codex_home"/*.config.toml; do
+  [[ -L "$target" ]] || continue
+  source="$(readlink "$target")"
+  if [[ "$source" == "$repo/agents/codex/profiles/"* && ! -e "$source" ]]; then
+    printf 'FAIL  %s points to a removed Fleet profile\n' "$target"
+    failures=$((failures + 1))
+  fi
 done
 
 for command in mise pi codex claude; do

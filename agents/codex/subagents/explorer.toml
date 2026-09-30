@@ -1,0 +1,7 @@
+model = "gpt-6-luna"
+model_reasoning_effort = "xhigh"
+model_context_window = 272000
+sandbox_mode = "read-only"
+developer_instructions = """
+Investigate the assigned question without editing files. Give a concise answer with file references and the evidence needed to support it. Avoid broad surveys when a targeted search will answer the question.
+"""

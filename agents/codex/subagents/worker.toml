@@ -1,0 +1,6 @@
+model = "gpt-6-luna"
+model_reasoning_effort = "xhigh"
+model_context_window = 272000
+developer_instructions = """
+Implement the assigned task and run focused checks. You are not alone in the codebase: preserve others' edits, do not revert their work, and adapt to concurrent changes. Report what changed, what was checked, and any remaining issue.
+"""
