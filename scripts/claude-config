@@ -34,7 +34,7 @@ def merge(base: dict[str, object], current: dict[str, object]) -> dict[str, obje
     overrides = merged.get("modelOverrides")
     if "modelPicker" in base and isinstance(overrides, dict):
         overrides = dict(overrides)
-        if overrides.get("claude-opus-5-5") == "gpt-6-sol":
+        if overrides.get("claude-opus-5-5") == "gpt-6.1-sol":
             overrides.pop("claude-opus-5-5")
         if overrides:
             merged["modelOverrides"] = overrides

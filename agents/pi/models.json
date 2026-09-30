@@ -6,7 +6,7 @@
       "apiKey": "$CPA_API_KEY",
       "models": [
         {
-          "id": "gpt-6-sol",
+          "id": "gpt-6.1-sol",
           "name": "Sol",
           "reasoning": true,
           "maxTokens": 128000,

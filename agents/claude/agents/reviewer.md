@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: Review code changes for concrete bugs, regressions, and missing safeguards.
-model: gpt-6-sol
+model: gpt-6.1-sol
 effort: low
 permissionMode: plan
 ---

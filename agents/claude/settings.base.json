@@ -1,9 +1,9 @@
 {
-  "model": "gpt-6-sol",
+  "model": "gpt-6.1-sol",
   "modelPicker": {
     "options": [
       {
-        "model": "gpt-6-sol",
+        "model": "gpt-6.1-sol",
         "label": "Sol",
         "behavesAs": "claude-opus-5-5"
       },

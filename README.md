@@ -14,7 +14,7 @@ Runtime state remains in `~/.pi/agent`, `~/.codex`, and `~/.claude`. Fleet insta
 
 ## Bootstrap
 
-`CPA_API_KEY` is machine-owned state. It must be exported by the machine environment or secret manager used to launch Pi, Codex, or Claude Code. Fleet does not provision or store its value. Claude Code reads it through `apiKeyHelper` and uses CPA's Anthropic-compatible endpoint with `gpt-6-sol` as its default model. No Claude subscription is required.
+`CPA_API_KEY` is machine-owned state. It must be exported by the machine environment or secret manager used to launch Pi, Codex, or Claude Code. Fleet does not provision or store its value. Claude Code reads it through `apiKeyHelper` and uses CPA's Anthropic-compatible endpoint with `gpt-6.1-sol` as its default model. No Claude subscription is required.
 
 ```bash
 cd ~/fleet
@@ -27,7 +27,7 @@ Agent instructions are assembled in the stable order declared by `prompts/agents
 
 Claude Code reads project `AGENTS.md` files directly. Fleet also installs a Claude plugin that lists skills from `.agents/skills/` at session start. Claude reads a matching `SKILL.md` when needed; these project skills are available to the agent but do not become slash commands. The plugin leaves project files untouched.
 
-Fleet installs Claude subagents in `~/.claude/agents`: `reviewer` uses `gpt-6-sol` at low effort, while `explorer` and `worker` use `gpt-6-luna` at xhigh effort. Reviewer and explorer are read-only.
+Fleet installs Claude subagents in `~/.claude/agents`: `reviewer` uses `gpt-6.1-sol` at low effort, while `explorer` and `worker` use `gpt-6-luna` at xhigh effort. Reviewer and explorer are read-only.
 
 Useful commands:
 
