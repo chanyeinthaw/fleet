@@ -1,28 +1,4 @@
 services:
-  friday-docker:
-    container_name: friday-docker
-    hostname: friday-docker
-    image: docker:29.7.2-dind
-    privileged: true
-    restart: unless-stopped
-    networks: [friday-docker]
-    dns: [1.1.1.1, 8.8.8.8]
-    command: ["--dns=1.1.1.1", "--dns=8.8.8.8"]
-    environment:
-      DOCKER_TLS_CERTDIR: /certs
-    volumes:
-      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/friday/docker:/var/lib/docker
-      - friday-docker-certs:/certs/client
-      # Bind mounts requested by Friday resolve inside this daemon container.
-      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/friday/home:/home/friday/.friday
-      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/friday/workspaces:/home/friday/workspaces
-    healthcheck:
-      test: [CMD-SHELL, "docker --host=tcp://localhost:2376 --tlsverify --tlscacert=/certs/client/ca.pem --tlscert=/certs/client/cert.pem --tlskey=/certs/client/key.pem info >/dev/null"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 15s
-
   friday:
     container_name: friday
     image: fleet/friday:nightly.46
@@ -31,11 +7,11 @@ services:
       dockerfile: services/friday/image/Dockerfile
     restart: unless-stopped
     depends_on:
-      friday-docker:
+      docker-in-docker:
         condition: service_healthy
-    networks: [default, friday-docker]
+    networks: [default, docker-in-docker]
     environment:
-      DOCKER_HOST: tcp://friday-docker:2376
+      DOCKER_HOST: tcp://docker-in-docker:2376
       DOCKER_TLS_VERIFY: "1"
       DOCKER_CERT_PATH: /certs/client
       CPA_API_KEY: ${FRIDAY_CPA_API_KEY:?required by fnox}
@@ -56,16 +32,10 @@ services:
       - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/friday/ssh-host:/var/lib/friday-ssh
       - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/friday/tailscale:/var/lib/tailscale
       - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/friday/workspaces:/home/friday/workspaces
-      - friday-docker-certs:/certs/client:ro
+      - docker-in-docker-certs:/certs/client:ro
     healthcheck:
       test: [CMD, /usr/local/bin/friday-healthcheck]
       interval: 30s
       timeout: 5s
       retries: 5
       start_period: 120s
-
-networks:
-  friday-docker:
-
-volumes:
-  friday-docker-certs:

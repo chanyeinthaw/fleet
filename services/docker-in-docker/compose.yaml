@@ -1,0 +1,31 @@
+services:
+  docker-in-docker:
+    container_name: docker-in-docker
+    hostname: docker-in-docker
+    image: docker:29.7.2-dind
+    privileged: true
+    restart: unless-stopped
+    networks: [docker-in-docker]
+    dns: [1.1.1.1, 8.8.8.8]
+    command: ["--dns=1.1.1.1", "--dns=8.8.8.8"]
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    volumes:
+      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/docker-in-docker:/var/lib/docker
+      - docker-in-docker-certs:/certs/client
+      # Bind mounts requested by Friday resolve inside this daemon container.
+      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/friday/home:/home/friday/.friday
+      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/friday/workspaces:/home/friday/workspaces
+    healthcheck:
+      test: [CMD-SHELL, "docker --host=tcp://localhost:2376 --tlsverify --tlscacert=/certs/client/ca.pem --tlscert=/certs/client/cert.pem --tlskey=/certs/client/key.pem info >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+networks:
+  docker-in-docker:
+
+volumes:
+  docker-in-docker-certs:
+    name: fleet-services_friday-docker-certs

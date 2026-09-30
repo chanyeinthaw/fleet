@@ -5,4 +5,5 @@ include:
   - cpa1/compose.yaml
   - cpa2/compose.yaml
   - newt/compose.yaml
+  - docker-in-docker/compose.yaml
   - friday/compose.yaml

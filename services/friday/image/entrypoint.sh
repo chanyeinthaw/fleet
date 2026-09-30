@@ -29,9 +29,9 @@ if [[ "$(id -u)" == "0" ]]; then
   install -d -m 700 -o friday -g friday /home/friday/.ssh
   install -d -m 755 -o friday -g friday /home/friday/workspaces
   printf '%s\n' \
-    'export DOCKER_HOST=tcp://friday-docker:2376' \
+    'export DOCKER_HOST=tcp://docker-in-docker:2376' \
     'export DOCKER_TLS_VERIFY=1' \
-    'export DOCKER_CERT_PATH=/certs/client' >/etc/profile.d/friday-docker.sh
+    'export DOCKER_CERT_PATH=/certs/client' >/etc/profile.d/docker-in-docker.sh
   install -m 600 -o friday -g friday /usr/local/share/friday/authorized_keys /home/friday/.ssh/authorized_keys
   install -d -m 755 /run/sshd /var/lib/tailscale
   install -d -m 700 /var/lib/friday-ssh
