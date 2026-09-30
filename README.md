@@ -155,3 +155,20 @@ Friday preserves the archived OpenCode model definitions in machine-local `frida
 The shared `docker-in-docker` service provides Docker for Friday and future containers. Its privileged daemon uses TLS on a private Compose network with no host port or Silicon Docker socket exposed. Friday includes the Docker CLI, Buildx, and Compose plugins. Docker data persists under `docker-in-docker`; projects that need bind mounts should live under `/home/friday/workspaces` or `/home/friday/.friday`, which both containers share at the same paths. Published ports of nested containers belong to the sidecar, not Silicon. Friday has no configured memory limit.
 
 Additional Docker clients join the `docker-in-docker` network, mount `docker-in-docker-certs` read-only at `/certs/client`, and set `DOCKER_HOST=tcp://docker-in-docker:2376`, `DOCKER_TLS_VERIFY=1`, and `DOCKER_CERT_PATH=/certs/client`. Clients share this daemon's containers and images. Bind-mount directories must also be mounted into the daemon at matching paths.
+
+## Machine-local CPA settings
+
+Copy `.fleetrc.example` to `.fleetrc` in Fleet's root to override agent routing on a machine. `.fleetrc` is gitignored TOML; omitted settings use the CPA1 Pangolin URL and `agents/cpa1-api-key` password-store entry.
+
+```toml
+[author]
+name = "Chan"
+
+[agents]
+cpa_url = "http://127.0.0.1:8320"
+cpa_secret = "agents/cpa1-api-key"
+```
+
+Use an origin without `/v1`; Fleet adds that path for Pi and Codex and uses the origin for Claude. Run `mise run link` after changing the URL. The installed secret helper reads the selected secret name at invocation time through fnox. Pi's generated `models.json` is machine-local rather than a link to the shared template. Service configuration and shared templates remain separate from these agent overrides.
+
+`[author].name` defaults to `Chan` and supplies the introduction in each harness's generated agent instructions. Run `mise run link` after changing it.

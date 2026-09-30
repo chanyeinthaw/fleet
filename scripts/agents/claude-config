@@ -8,6 +8,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from fleet_config import agent_base
 
 
 def fail(message: str) -> None:
@@ -93,7 +94,7 @@ def main() -> None:
     if len(sys.argv) != 4 or sys.argv[1] not in {"sync", "check"}:
         fail(f"usage: {Path(sys.argv[0]).name} sync|check BASE TARGET")
     action, base_name, target_name = sys.argv[1:]
-    base = read_object(Path(base_name))
+    base = json.loads(agent_base(Path(base_name)))
     target = Path(target_name)
     sync(base, target) if action == "sync" else check(base, target)
 

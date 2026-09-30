@@ -83,7 +83,7 @@ check_skills() {
 
 "$repo/scripts/agents/instructions" check "$repo/prompts/agents/catalog.yaml" pi "$pi_home/AGENTS.md" || failures=$((failures + 1))
 check_link "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
-check_link "$repo/agents/pi/models.json" "$pi_home/models.json"
+"$repo/scripts/agents/pi-models" check "$repo/agents/pi/models.json" "$pi_home/models.json" || failures=$((failures + 1))
 check_link "$repo/agents/pi/settings.json" "$pi_home/settings.json"
 check_link "$repo/agents/pi/themes" "$pi_home/themes"
 check_absent "$pi_home/extensions/subagents.txt"

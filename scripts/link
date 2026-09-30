@@ -85,7 +85,6 @@ link_path "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
 sync_skills pi "$pi_home/skills"
 
 for path in \
-  models.json \
   settings.json \
   package.json \
   pnpm-lock.yaml \
@@ -96,6 +95,8 @@ for path in \
   src; do
   link_path "$repo/agents/pi/$path" "$pi_home/$path"
 done
+
+"$repo/scripts/agents/pi-models" sync "$repo/agents/pi/models.json" "$pi_home/models.json"
 
 mkdir -p "$pi_home/extensions"
 for extension in "$repo"/agents/pi/extensions/*; do

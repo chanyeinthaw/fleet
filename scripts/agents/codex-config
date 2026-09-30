@@ -9,6 +9,7 @@ import sys
 import tempfile
 import tomllib
 from pathlib import Path
+from fleet_config import agent_base
 
 
 START = "# BEGIN FLEET MANAGED CONFIG"
@@ -97,7 +98,7 @@ def render(base: str, existing: str) -> str:
 
 
 def sync(base_path: Path, target_path: Path) -> None:
-    base = base_path.read_text()
+    base = agent_base(base_path)
     existing = target_path.read_text() if target_path.exists() else ""
     merged = render(base, existing)
 
@@ -125,7 +126,7 @@ def check(base_path: Path, target_path: Path) -> None:
     if not target_path.is_file():
         fail(f"{target_path} is missing")
 
-    base = base_path.read_text().strip()
+    base = agent_base(base_path).strip()
     config = target_path.read_text()
     expected_block = START + "\n" + base + "\n" + END
     if config.count(START) != 1 or config.count(END) != 1 or expected_block not in config:

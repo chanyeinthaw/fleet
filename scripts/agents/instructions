@@ -8,6 +8,7 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+from fleet_config import author_name
 
 
 KEY = r"[a-z0-9-]+"
@@ -77,7 +78,7 @@ def render(catalog_path: Path, harness: str) -> str:
     parts: list[str] = []
     for name in order:
         relative = sections[name] if name in sections else variants[name][harness]
-        parts.append(section_path(root, relative).read_text().strip())
+        parts.append(section_path(root, relative).read_text().strip().replace("{{author.name}}", author_name()))
     return "\n\n".join(parts) + "\n"
 
 
