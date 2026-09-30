@@ -135,3 +135,21 @@ mise run services:up -- --no-recreate newt
 ```
 
 The secret is encrypted at `secrets/services/newt/site-secret.gpg`. Add it before running service tasks. Keep the existing Silicon Newt service running until the new site is connected and its CPA resources have been switched and verified in Pangolin.
+
+### Friday
+
+Friday runs as the `friday` container with HTTP on `127.0.0.1:4020`, OpenSSH, and its existing Tailscale identity. Its `friday` fnox profile supplies Discord, CPA, and Tailscale credentials. Persistent data lives under the service data directory's `friday/` subdirectories: `home`, `pi`, `gh`, `ssh`, `ssh-host`, and `tailscale`.
+
+The image includes Fleet's agent configuration and skills instead of cloning pi-setup. The startup links Fleet configuration while keeping Pi sessions and authentication. Friday resolves the injected `CPA_API_KEY` into an owner-only generated model configuration outside Git, so no GPG private key or secret store is copied into the image. Build context excludes encrypted secrets, local dependencies, and runtime data. Rebuild Friday to pick up Fleet changes:
+
+```bash
+mise run services:up -- --build --no-deps friday
+```
+
+Friday's existing nightly.46 runtime and database are preserved. Startup does not automatically upgrade the Friday binary; `docker exec --user friday friday friday-update` performs its existing update workflow. The original k3s PVCs and the copied `pi/agent-pi-setup` directory remain available for recovery. Stop Compose Friday before restoring the old k3s deployment, so only one Discord worker and Tailscale node run at a time.
+
+Friday's primary Sol selection and Sol/Luna-fast subagent profiles were updated to the Fleet catalog's GPT-6.1 Sol and GPT-6 Luna-fast. Other custom profiles and the utility model remain unchanged.
+
+Friday preserves the archived OpenCode model definitions in machine-local `friday/pi/provider-overrides.json`; startup merges these with Fleet models. Existing OpenCode authentication remains in Pi's `auth.json`. These overrides survive rebuilds without changing the shared Fleet catalog.
+
+Friday has a dedicated `friday-docker` Docker-in-Docker sidecar. Its privileged daemon uses TLS on a private Compose network with no host port or Silicon Docker socket exposed. Friday includes the Docker CLI, Buildx, and Compose plugins. Docker data persists under `friday/docker`; projects that need bind mounts should live under `/home/friday/workspaces` or `/home/friday/.friday`, which both containers share at the same paths. Published ports of nested containers belong to the sidecar, not Silicon. Friday has no configured memory limit.

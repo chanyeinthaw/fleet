@@ -10,7 +10,7 @@ import sys
 repo = Path(__file__).resolve().parents[2]
 env = os.environ.copy()
 env.setdefault("FLEET_SERVICES_DATA_DIR", str(Path(env.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "fleet/services"))
-for profile in ("postgres", "cpa1", "cpa2", "newt"):
+for profile in ("postgres", "cpa1", "cpa2", "newt", "friday"):
     result = subprocess.run(
         [str(repo / "scripts/secrets/fnox"), "-P", profile, "export", "--format", "json"],
         capture_output=True,

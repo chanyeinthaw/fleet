@@ -1,0 +1,13 @@
+**
+!agents/
+!agents/**
+!prompts/
+!prompts/**
+!scripts/
+!scripts/**
+!services/
+!services/friday/
+!services/friday/image/
+!services/friday/image/**
+**/node_modules
+**/__pycache__

@@ -25,3 +25,10 @@ PGSTORE_DSN = { provider = "gopass", value = "services/cpa1/pgstore-dsn" }
 
 [profiles.newt.secrets]
 SITE_SECRET= { provider = "gopass", value = "services/newt/site-secret" }
+
+[profiles.friday.secrets]
+CPA_API_KEY = { provider = "gopass", value = "agents/cpa1-api-key" }
+DISCORD_APPLICATION_ID = { provider = "gopass", value = "services/friday/discord-application-id" }
+DISCORD_BOT_TOKEN = { provider = "gopass", value = "services/friday/discord-bot-token" }
+DISCORD_PUBLIC_KEY = { provider = "gopass", value = "services/friday/discord-public-key" }
+TAILSCALE_AUTH_KEY = { provider = "gopass", value = "services/friday/tailscale-auth-key" }
