@@ -23,7 +23,7 @@ mise run bootstrap
 
 The bootstrap installs the Pi, Codex, Claude Code, and gopass versions declared once in the `tools` task in `mise.toml`, activates them in mise's global config, installs Pi's package dependencies, and installs all three agents' configuration. `mise run update` uses the same tool versions. gopass uses mise's Aqua backend to install upstream binaries for Linux and macOS, without Homebrew.
 
-Agent instructions are assembled in the stable order declared by `prompts/agents/catalog.yaml`. Shared sections come from `prompts/agents/*.md`; the `harness` slot selects the agent-specific instructions for Pi, Codex, or Claude Code.
+Agent instructions are assembled in the stable order declared by `prompts/agents/catalog.yaml`. Shared sections come from `prompts/agents/*.md`; the `harness` and `computers` slots select the matching instructions for Pi, Codex, or Claude Code. The computers section points to the current harness's global reference file and respects its config directory override.
 
 Claude Code reads project `AGENTS.md` files directly. Fleet also installs a Claude plugin that lists skills from `.agents/skills/` at session start. Claude reads a matching `SKILL.md` when needed; these project skills are available to the agent but do not become slash commands. The plugin leaves project files untouched.
 

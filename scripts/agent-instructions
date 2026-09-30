@@ -20,43 +20,41 @@ def fail(message: str) -> None:
     raise SystemExit(1)
 
 
-def parse_catalog(path: Path) -> tuple[list[str], dict[str, str], dict[str, str]]:
-    values: dict[str, list[str] | dict[str, str]] = {
-        "order": [],
-        "sections": {},
-        "harness": {},
-    }
+def parse_catalog(path: Path) -> tuple[list[str], dict[str, str], dict[str, dict[str, str]]]:
+    order: list[str] = []
+    sections: dict[str, str] = {}
+    variants: dict[str, dict[str, str]] = {}
     current: str | None = None
 
     for line_number, line in enumerate(path.read_text().splitlines(), start=1):
         if not line or line.startswith("#"):
             continue
-        if line in {"order:", "sections:", "harness:"}:
+        if re.fullmatch(rf"{KEY}:", line):
             current = line[:-1]
+            if current not in {"order", "sections"}:
+                variants.setdefault(current, {})
             continue
         if current == "order" and (match := ORDER_ITEM.fullmatch(line)):
-            order = values["order"]
-            assert isinstance(order, list)
             order.append(match.group(1))
             continue
-        if current in {"sections", "harness"} and (match := MAPPING_ITEM.fullmatch(line)):
-            mapping = values[current]
-            assert isinstance(mapping, dict)
+        if current and current != "order" and (match := MAPPING_ITEM.fullmatch(line)):
+            mapping = sections if current == "sections" else variants[current]
             mapping[match.group(1)] = match.group(2)
             continue
         fail(f"unsupported catalog syntax at {path}:{line_number}")
 
-    order = values["order"]
-    sections = values["sections"]
-    harnesses = values["harness"]
-    assert isinstance(order, list)
-    assert isinstance(sections, dict)
-    assert isinstance(harnesses, dict)
     if not order or len(order) != len(set(order)):
         fail("catalog order must contain unique section names")
-    if set(order) != {*sections, "harness"}:
-        fail("catalog order must contain every section and one harness slot")
-    return order, sections, harnesses
+    if set(sections) & set(variants):
+        fail("catalog sections cannot be both shared and harness-specific")
+    if set(order) != {*sections, *variants}:
+        fail("catalog order must contain every shared and harness-specific section")
+    if not variants.get("harness"):
+        fail("catalog must define a harness section")
+    for name, mapping in variants.items():
+        if set(mapping) != set(variants["harness"]):
+            fail(f"catalog section {name} must define the same harnesses as the harness section")
+    return order, sections, variants
 
 
 def section_path(root: Path, relative: str) -> Path:
@@ -71,14 +69,14 @@ def section_path(root: Path, relative: str) -> Path:
 
 
 def render(catalog_path: Path, harness: str) -> str:
-    order, sections, harnesses = parse_catalog(catalog_path)
-    if harness not in harnesses:
+    order, sections, variants = parse_catalog(catalog_path)
+    if harness not in variants["harness"]:
         fail(f"unknown harness: {harness}")
 
     root = catalog_path.parent
     parts: list[str] = []
     for name in order:
-        relative = harnesses[harness] if name == "harness" else sections[name]
+        relative = sections[name] if name in sections else variants[name][harness]
         parts.append(section_path(root, relative).read_text().strip())
     return "\n\n".join(parts) + "\n"
 

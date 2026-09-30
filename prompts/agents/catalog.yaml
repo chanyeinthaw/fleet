@@ -20,10 +20,14 @@ sections:
   visual-design: visual-design.md
   blast-radius: blast-radius.md
   pull-requests: pull-requests.md
-  computers: computers.md
   secrets: secrets.md
 
 harness:
   pi: harness/pi.md
   codex: harness/codex.md
   claude: harness/claude.md
+
+computers:
+  pi: computers/pi.md
+  codex: computers/codex.md
+  claude: computers/claude.md
