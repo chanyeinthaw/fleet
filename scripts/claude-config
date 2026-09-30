@@ -29,6 +29,11 @@ def read_object(path: Path) -> dict[str, object]:
 
 def merge(base: dict[str, object], current: dict[str, object]) -> dict[str, object]:
     merged = dict(current)
+    env = merged.get("env")
+    if isinstance(env, dict) and env.get("ANTHROPIC_CUSTOM_HEADERS") == "x-opencode-session: claude":
+        env = dict(env)
+        env.pop("ANTHROPIC_CUSTOM_HEADERS")
+        merged["env"] = env
     if "enableArtifact" in base:
         merged.pop("disableArtifact", None)
     overrides = merged.get("modelOverrides")

@@ -24,10 +24,13 @@ config_file = "subagents/reviewer.toml"
 description = "Implement a scoped code change and verify the result."
 config_file = "subagents/worker.toml"
 
+[agents.uiux]
+description = "Design and implement UI/UX changes, or audit interfaces and user flows for usability and accessibility."
+config_file = "subagents/uiux.toml"
+
 [model_providers.cpa]
 name = "CLI Proxy API"
 base_url = "https://cpa1.p.si14.space/v1"
 wire_api = "responses"
 env_key = "CPA_API_KEY"
 requires_openai_auth = false
-http_headers = { "x-opencode-session" = "codex" }

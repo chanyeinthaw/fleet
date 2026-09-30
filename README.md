@@ -1,6 +1,6 @@
 # Fleet
 
-Personal coding-agent configuration shared by Pi, Codex, and Claude Code, with per-harness skill routing.
+Personal development environment configuration shared across machines. Fleet manages coding-agent configuration, prompts, skills, and encrypted secrets, with dotfiles support planned.
 
 ## Layout
 
@@ -8,6 +8,7 @@ Personal coding-agent configuration shared by Pi, Codex, and Claude Code, with p
 agents/    Agent-specific configuration and code
 prompts/   Composed agent instructions, skills, and reference files
 scripts/   Idempotent installation and validation scripts
+secrets/   GPG-encrypted credentials accessed with gopass
 ```
 
 Runtime state remains in `~/.pi/agent`, `~/.codex`, and `~/.claude`. Fleet installs managed configuration into those directories without managing sessions, caches, or Codex system skills. Shared secrets live in a GPG-encrypted password store under `secrets/`. Codex's `config.toml` and Claude Code's `settings.json` stay machine-local. Fleet updates their managed values while preserving other local settings.
@@ -27,7 +28,7 @@ Agent instructions are assembled in the stable order declared by `prompts/agents
 
 Claude Code reads project `AGENTS.md` files directly. Fleet also installs a Claude plugin that lists skills from `.agents/skills/` at session start. Claude reads a matching `SKILL.md` when needed; these project skills are available to the agent but do not become slash commands. The plugin leaves project files untouched.
 
-Fleet installs Claude subagents in `~/.claude/agents`: `reviewer` uses `gpt-6.1-sol` at low effort, while `explorer` and `worker` use `gpt-6-luna` at xhigh effort. Reviewer and explorer are read-only.
+Fleet installs Claude subagents in `~/.claude/agents`: `reviewer` uses `gpt-6.1-sol` at low effort, `explorer` and `worker` use `gpt-6-luna` at xhigh effort, and `uiux` uses `ocg/glm-5.3-flash`. Reviewer and explorer are read-only. UI/UX audits inspect without editing; UI/UX implementation tasks can make scoped changes. CPA's `opencode-session` plugin v0.1.7 or newer derives OCG routing headers from Codex thread metadata and Claude Code session metadata; clients do not send a hardcoded session header.
 
 Useful commands:
 
@@ -76,4 +77,4 @@ Supported values are `pi`, `codex`, `claude`, and `opencode`. A skill without `m
 
 Wayfinder and its companion skills (`setup-matt-pocock-skills`, `domain-modeling`, `research`, `prototype`, `to-spec`, and `to-tickets`) are vendored from [mattpocock/skills](https://github.com/mattpocock/skills/tree/d81f3a183412e71a5b1e84ca21bc1a35eea03a60) at `d81f3a1`, with only Fleet's harness metadata added. Wayfinder uses Fleet's existing `grilling` skill. The upstream MIT license is in `prompts/skills/MATT-POCOCK-LICENSE`. After linking, run `/setup-matt-pocock-skills` in each repository where you want to use `/wayfinder`, `/to-spec`, or `/to-tickets`; it asks before writing repository-specific issue tracker and domain settings.
 
-Codex and Claude Code share three named subagent roles: `explorer` investigates code without editing, `reviewer` checks changes without editing, and `worker` implements scoped changes. Explorer and worker use Luna at `xhigh` reasoning; reviewer uses Sol at `low` reasoning.
+Codex and Claude Code share four named subagent roles: `explorer` investigates code without editing, `reviewer` checks changes without editing, `worker` implements scoped changes, and `uiux` implements UI/UX changes or audits usability and accessibility. Explorer and worker use Luna at `xhigh` reasoning; reviewer uses Sol at `low` reasoning; UI/UX uses `ocg/glm-5.3-flash`.
