@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+
+# fnox's password-store provider invokes pass; only these calls use this bridge.
+store="${PASSWORD_STORE_DIR:?fnox must supply the password-store directory}"
+config="$(mktemp "${TMPDIR:-/tmp}/fleet-gopass.XXXXXX")"
+trap 'rm -f "$config"' EXIT
+python - "$store" "$config" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+Path(sys.argv[2]).write_text(
+    "[mounts]\n\tpath = " + json.dumps(sys.argv[1]) +
+    "\n[core]\n\tautosync = false\n\tautopush = false\n"
+)
+PY
+export GOPASS_CONFIG="$config"
+command="${1:?expected show, insert, or ls}"
+shift
+case "$command" in
+  show) gopass show --noparsing "$@" ;;
+  insert) gopass insert "$@" ;;
+  ls) gopass ls "$@" ;;
+  *) printf 'Unsupported fnox password-store operation: %s\n' "$command" >&2; exit 1 ;;
+esac

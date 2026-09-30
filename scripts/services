@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+action="${1:?usage: services up|down|restart [compose arguments]}"
+shift
+export FLEET_SERVICES_DATA_DIR="${FLEET_SERVICES_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/fleet/services}"
+case "$action" in
+  up)
+    mkdir -p -m 700 "$FLEET_SERVICES_DATA_DIR"
+    args=(up -d "$@")
+    ;;
+  down|restart) args=("$action" "$@") ;;
+  *) printf 'Unknown service action: %s\n' "$action" >&2; exit 1 ;;
+esac
+exec python "$repo/scripts/services-compose" "${args[@]}"

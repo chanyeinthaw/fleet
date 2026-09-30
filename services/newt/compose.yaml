@@ -1,0 +1,11 @@
+services:
+  newt:
+    image: fosrl/pangolin-cli
+    container_name: newt
+    restart: unless-stopped
+    # CPA's published ports bind to the host's loopback interface.
+    network_mode: host
+    environment:
+      PANGOLIN_ENDPOINT: https://app.pangolin.net
+      SITE_ID: p946mt1f12e3jgo
+      SITE_SECRET: ${NEWT_SITE_SECRET:?add SITE_SECRET to the newt fnox profile}

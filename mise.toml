@@ -1,6 +1,15 @@
+[tools]
+fnox = "1.35.3"
+
+[env]
+_.path = ["{{config_root}}/scripts/fnox-adapter"]
+PASSWORD_STORE_DIR = "{{config_root}}/secrets"
+FNOX_DAEMON = "false"
+
 [tasks.tools]
 description = "Install and activate Fleet's CLI versions"
 run = [
+  "mise install fnox",
   "mise use --global npm:@openai/codex@0.159.2 pi@0.85.1 claude@2.1.285 gopass@1.17.3",
   'gopass config mounts.path "{{config_root}}/secrets"',
   "gopass config core.autosync false",
@@ -32,3 +41,15 @@ run = [
   "./scripts/link",
   "./scripts/check",
 ]
+
+[tasks."services:up"]
+description = "Start or reconcile Fleet's Compose services"
+run = "./scripts/services up"
+
+[tasks."services:down"]
+description = "Stop Fleet's Compose services while preserving local data"
+run = "./scripts/services down"
+
+[tasks."services:restart"]
+description = "Restart Fleet's existing Compose containers"
+run = "./scripts/services restart"

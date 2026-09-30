@@ -1,0 +1,7 @@
+name: fleet-services
+
+include:
+  - postgres/compose.yaml
+  - cpa1/compose.yaml
+  - cpa2/compose.yaml
+  - newt/compose.yaml

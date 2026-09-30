@@ -1,0 +1,20 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:18.4@sha256:a02db8cac496f15b094798a38254f14d6e00741f709360e5e00bb6668ea31636
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required by fnox}
+      CPA1_DB_PASSWORD: ${CPA1_DB_PASSWORD:?required by fnox}
+      CPA2_DB_PASSWORD: ${CPA2_DB_PASSWORD:?required by fnox}
+    volumes:
+      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/postgres:/var/lib/postgresql
+      - ./init.sh:/docker-entrypoint-initdb.d/10-cpa2.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    mem_limit: 1g
