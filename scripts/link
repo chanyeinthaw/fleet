@@ -53,7 +53,7 @@ sync_skills() {
     local name
     local harnesses
     name="$(basename "$skill")"
-    harnesses="$("$repo/scripts/skill-harnesses" "$skill/SKILL.md")"
+    harnesses="$("$repo/scripts/agents/skill-harnesses" "$skill/SKILL.md")"
 
     if grep -Fxq "$harness" <<< "$harnesses"; then
       link_path "$skill" "$target_root/$name"
@@ -74,12 +74,13 @@ sync_skills() {
 }
 
 mkdir -p "$pi_home" "$codex_home" "$claude_home"
-link_path "$repo/scripts/cpa-key" "$HOME/.local/bin/fleet-cpa-key"
+remove_managed_link "$repo/scripts/cpa-key" "$HOME/.local/bin/fleet-cpa-key"
+link_path "$repo/scripts/secrets/fnox" "$HOME/.local/bin/fleet-fnox"
 
 remove_managed_link "$repo/agents/pi/extensions/subagents.txt" "$pi_home/extensions/subagents.txt"
 remove_managed_link "$repo/agents/pi/packages" "$pi_home/packages"
 
-"$repo/scripts/agent-instructions" sync "$repo/prompts/agents/catalog.yaml" pi "$pi_home/AGENTS.md"
+"$repo/scripts/agents/instructions" sync "$repo/prompts/agents/catalog.yaml" pi "$pi_home/AGENTS.md"
 link_path "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
 sync_skills pi "$pi_home/skills"
 
@@ -102,15 +103,15 @@ for extension in "$repo"/agents/pi/extensions/*; do
   link_path "$extension" "$pi_home/extensions/$(basename "$extension")"
 done
 
-"$repo/scripts/agent-instructions" sync "$repo/prompts/agents/catalog.yaml" codex "$codex_home/AGENTS.md"
+"$repo/scripts/agents/instructions" sync "$repo/prompts/agents/catalog.yaml" codex "$codex_home/AGENTS.md"
 link_path "$repo/prompts/references/COMPUTERS.md" "$codex_home/COMPUTERS.md"
-"$repo/scripts/codex-config" sync "$repo/agents/codex/config.base.toml" "$codex_home/config.toml"
+"$repo/scripts/agents/codex-config" sync "$repo/agents/codex/config.base.toml" "$codex_home/config.toml"
 link_path "$repo/agents/codex/subagents" "$codex_home/subagents"
 sync_skills codex "$codex_home/skills"
 
-"$repo/scripts/agent-instructions" sync "$repo/prompts/agents/catalog.yaml" claude "$claude_home/CLAUDE.md"
+"$repo/scripts/agents/instructions" sync "$repo/prompts/agents/catalog.yaml" claude "$claude_home/CLAUDE.md"
 link_path "$repo/prompts/references/COMPUTERS.md" "$claude_home/COMPUTERS.md"
-"$repo/scripts/claude-config" sync "$repo/agents/claude/settings.base.json" "$claude_home/settings.json"
+"$repo/scripts/agents/claude-config" sync "$repo/agents/claude/settings.base.json" "$claude_home/settings.json"
 sync_skills claude "$claude_home/skills"
 link_path "$repo/agents/claude/plugins/project-skills" "$claude_home/skills/fleet-project-skills"
 for agent in "$repo"/agents/claude/agents/*.md; do

@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
-repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-export PATH="$repo/scripts/fnox-adapter:$PATH"
-export PASSWORD_STORE_DIR="$repo/secrets"
-exec fnox --no-daemon --config "$repo/fnox.toml" "$@"

@@ -61,7 +61,7 @@ check_skills() {
     local name
     local harnesses
     name="$(basename "$skill")"
-    harnesses="$("$repo/scripts/skill-harnesses" "$skill/SKILL.md")"
+    harnesses="$("$repo/scripts/agents/skill-harnesses" "$skill/SKILL.md")"
 
     if grep -Fxq "$harness" <<< "$harnesses"; then
       check_link "$skill" "$target_root/$name"
@@ -81,7 +81,7 @@ check_skills() {
   done
 }
 
-"$repo/scripts/agent-instructions" check "$repo/prompts/agents/catalog.yaml" pi "$pi_home/AGENTS.md" || failures=$((failures + 1))
+"$repo/scripts/agents/instructions" check "$repo/prompts/agents/catalog.yaml" pi "$pi_home/AGENTS.md" || failures=$((failures + 1))
 check_link "$repo/prompts/references/COMPUTERS.md" "$pi_home/COMPUTERS.md"
 check_link "$repo/agents/pi/models.json" "$pi_home/models.json"
 check_link "$repo/agents/pi/settings.json" "$pi_home/settings.json"
@@ -94,12 +94,12 @@ for extension in "$repo"/agents/pi/extensions/*; do
   check_link "$extension" "$pi_home/extensions/$(basename "$extension")"
 done
 
-"$repo/scripts/agent-instructions" check "$repo/prompts/agents/catalog.yaml" codex "$codex_home/AGENTS.md" || failures=$((failures + 1))
-"$repo/scripts/codex-config" check "$repo/agents/codex/config.base.toml" "$codex_home/config.toml" || failures=$((failures + 1))
+"$repo/scripts/agents/instructions" check "$repo/prompts/agents/catalog.yaml" codex "$codex_home/AGENTS.md" || failures=$((failures + 1))
+"$repo/scripts/agents/codex-config" check "$repo/agents/codex/config.base.toml" "$codex_home/config.toml" || failures=$((failures + 1))
 check_link "$repo/agents/codex/subagents" "$codex_home/subagents"
-"$repo/scripts/agent-instructions" check "$repo/prompts/agents/catalog.yaml" claude "$claude_home/CLAUDE.md" || failures=$((failures + 1))
+"$repo/scripts/agents/instructions" check "$repo/prompts/agents/catalog.yaml" claude "$claude_home/CLAUDE.md" || failures=$((failures + 1))
 check_link "$repo/prompts/references/COMPUTERS.md" "$claude_home/COMPUTERS.md"
-"$repo/scripts/claude-config" check "$repo/agents/claude/settings.base.json" "$claude_home/settings.json" || failures=$((failures + 1))
+"$repo/scripts/agents/claude-config" check "$repo/agents/claude/settings.base.json" "$claude_home/settings.json" || failures=$((failures + 1))
 
 check_skills pi "$pi_home/skills"
 check_skills codex "$codex_home/skills"
@@ -120,7 +120,7 @@ for target in "$codex_home"/*.config.toml; do
   fi
 done
 
-check_link "$repo/scripts/cpa-key" "$HOME/.local/bin/fleet-cpa-key"
+check_link "$repo/scripts/secrets/fnox" "$HOME/.local/bin/fleet-fnox"
 
 for command in mise pi codex claude gopass; do
   if command -v "$command" >/dev/null; then
@@ -135,7 +135,7 @@ if [[ ! -d "$codex_home/skills/.system" ]]; then
   printf 'WARN  %s is missing; Codex normally creates its bundled skills here\n' "$codex_home/skills/.system"
 fi
 
-"$repo/scripts/cpa-key" status || failures=$((failures + 1))
+"$repo/scripts/secrets/fnox" -P agents daemon status || failures=$((failures + 1))
 
 if (( failures > 0 )); then
   printf '\n%d check(s) failed. Run: mise run link\n' "$failures"

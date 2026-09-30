@@ -35,5 +35,5 @@ wire_api = "responses"
 
 [model_providers.cpa.auth]
 command = "/bin/sh"
-args = ["-c", 'exec "$HOME/.local/bin/fleet-cpa-key"']
+args = ["-c", 'exec "$HOME/.local/bin/fleet-fnox" -P agents get CPA_API_KEY']
 timeout_ms = 120000

@@ -14,7 +14,7 @@
       }
     ]
   },
-  "apiKeyHelper": "\"$HOME/.local/bin/fleet-cpa-key\"",
+  "apiKeyHelper": "\"$HOME/.local/bin/fleet-fnox\" -P agents get CPA_API_KEY",
   "attribution": {
     "commit": "",
     "pr": "",

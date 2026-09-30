@@ -2,9 +2,9 @@
 fnox = "1.35.3"
 
 [env]
-_.path = ["{{config_root}}/scripts/fnox-adapter"]
+_.path = ["{{config_root}}/scripts/secrets/adapter"]
 PASSWORD_STORE_DIR = "{{config_root}}/secrets"
-FNOX_DAEMON = "false"
+FNOX_DAEMON = "on"
 
 [tasks.tools]
 description = "Install and activate Fleet's CLI versions"
@@ -33,9 +33,9 @@ run = "./scripts/link"
 description = "Validate Fleet configuration and installed links"
 run = "./scripts/check"
 
-[tasks."cpa:warm"]
-description = "Unlock GPG if needed and cache the CPA key for this boot"
-run = "./scripts/cpa-key warm"
+[tasks.secrets]
+description = "Manage fnox secrets; use warm to cache every configured profile"
+run = "./scripts/secrets/fnox"
 
 [tasks.update]
 description = "Refresh agent tools and configuration"
@@ -48,12 +48,12 @@ run = [
 
 [tasks."services:up"]
 description = "Start or reconcile Fleet's Compose services"
-run = "./scripts/services up"
+run = "./scripts/services/run up"
 
 [tasks."services:down"]
 description = "Stop Fleet's Compose services while preserving local data"
-run = "./scripts/services down"
+run = "./scripts/services/run down"
 
 [tasks."services:restart"]
 description = "Restart Fleet's existing Compose containers"
-run = "./scripts/services restart"
+run = "./scripts/services/run restart"

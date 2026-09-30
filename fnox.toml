@@ -1,21 +1,27 @@
+[daemon]
+enabled = true
+idle_timeout = "365d"
+
+[profiles.agents.secrets]
+CPA_API_KEY = { provider = "gopass", value = "agents/cpa1-api-key", env = false }
+
 [providers.gopass]
 type = "password-store"
-prefix = "services/"
 
 [profiles.postgres.secrets]
-POSTGRES_PASSWORD = { provider = "gopass", value = "postgres/password" }
+POSTGRES_PASSWORD = { provider = "gopass", value = "services/postgres/password" }
 
 [profiles.cpa2.secrets]
-DB_PASSWORD = { provider = "gopass", value = "cpa2/db-password" }
-CLI_PROXY_DB_PASSWORD = { provider = "gopass", value = "cpa2/cli-proxy-db-password" }
-MANAGEMENT_PASSWORD = { provider = "gopass", value = "cpa2/management-password" }
-PGSTORE_DSN = { provider = "gopass", value = "cpa2/pgstore-dsn" }
+DB_PASSWORD = { provider = "gopass", value = "services/cpa2/db-password" }
+CLI_PROXY_DB_PASSWORD = { provider = "gopass", value = "services/cpa2/cli-proxy-db-password" }
+MANAGEMENT_PASSWORD = { provider = "gopass", value = "services/cpa2/management-password" }
+PGSTORE_DSN = { provider = "gopass", value = "services/cpa2/pgstore-dsn" }
 
 [profiles.cpa1.secrets]
-DB_PASSWORD = { provider = "gopass", value = "cpa1/db-password" }
-CLI_PROXY_DB_PASSWORD = { provider = "gopass", value = "cpa1/cli-proxy-db-password" }
-MANAGEMENT_PASSWORD = { provider = "gopass", value = "cpa1/management-password" }
-PGSTORE_DSN = { provider = "gopass", value = "cpa1/pgstore-dsn" }
+DB_PASSWORD = { provider = "gopass", value = "services/cpa1/db-password" }
+CLI_PROXY_DB_PASSWORD = { provider = "gopass", value = "services/cpa1/cli-proxy-db-password" }
+MANAGEMENT_PASSWORD = { provider = "gopass", value = "services/cpa1/management-password" }
+PGSTORE_DSN = { provider = "gopass", value = "services/cpa1/pgstore-dsn" }
 
 [profiles.newt.secrets]
-SITE_SECRET= { provider = "gopass", value = "newt/site-secret" }
+SITE_SECRET= { provider = "gopass", value = "services/newt/site-secret" }

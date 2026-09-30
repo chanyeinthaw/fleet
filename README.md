@@ -7,7 +7,7 @@ Personal development environment configuration shared across machines. Fleet man
 ```text
 agents/    Agent-specific configuration and code
 prompts/   Composed agent instructions, skills, and reference files
-scripts/   Idempotent installation and validation scripts
+scripts/   link/check entry points; agents/, secrets/, and services/ helpers
 secrets/   GPG-encrypted credentials accessed with gopass
 services/  Split Docker Compose definitions and fnox secret references
 ```
@@ -16,7 +16,7 @@ Runtime state remains in `~/.pi/agent`, `~/.codex`, and `~/.claude`. Fleet insta
 
 ## Bootstrap
 
-Pi, Codex, and Claude Code retrieve the CPA key through Fleet's `fleet-cpa-key` helper, including when launched by T3 Code. No `CPA_API_KEY` shell export is needed. Claude Code uses CPA's Anthropic-compatible endpoint with `gpt-6.1-sol` as its default model. No Claude subscription is required.
+Pi, Codex, and Claude Code retrieve the CPA key through Fleet's `fleet-fnox` helper, including when launched by T3 Code. No `CPA_API_KEY` shell export is needed. Claude Code uses CPA's Anthropic-compatible endpoint with `gpt-6.1-sol` as its default model. No Claude subscription is required.
 
 ```bash
 cd ~/fleet
@@ -53,28 +53,27 @@ gopass insert --multiline jp-mirai/example-ssh-key
 
 `gopass config mounts.path` shows the configured store. Running Fleet's tools task sets Fleet as the root store and disables gopass's automatic sync and push because Fleet manages Git. Other gopass settings and mounts are preserved.
 
-### CPA key cache
+### Secret cache
 
-Add the key once through gopass's hidden prompt, then warm the cache:
-
-```bash
-gopass insert agents/cpa1-api-key
-mise run cpa:warm
-```
-
-Bootstrap and update install the helper at `~/.local/bin/fleet-cpa-key` and configure each agent to call it. The first request decrypts `agents/cpa1-api-key` and caches it for the current boot. GPG's passphrase timeout is unchanged; other secrets still require GPG access after it expires. `mise run check` reports cache status without decrypting or printing the key.
-
-After reboot, run `mise run cpa:warm` from Fleet to unlock GPG if needed and prepare the cache before launching an agent.
-
-Linux uses `$XDG_RUNTIME_DIR/fleet/`, falling back to `/run/user/<uid>/fleet/` for services without that variable. macOS uses the user's temporary directory reported by `getconf DARWIN_USER_TEMP_DIR`, the same directory normally used for `$TMPDIR`. This keeps terminal and service launches on the same cache. The helper records the boot identity and rejects earlier-boot caches, since macOS temporary files may survive reboot. The directory has mode `0700` and cache files have mode `0600`.
+All configured agent and service secret reads use fnox's in-memory daemon cache through the root `fnox.toml`. To unlock GPG and warm every configured profile:
 
 ```bash
-~/.local/bin/fleet-cpa-key status   # No decryption or key output
-~/.local/bin/fleet-cpa-key refresh  # Reload after rotating the gopass entry
-~/.local/bin/fleet-cpa-key clear    # Remove the cached key
+mise run secrets warm
 ```
 
-The cache contains the decrypted CPA key until cleared or invalidated at the next boot. Screen lock does not clear it, and processes running as your user can read it. Agents may also cache credentials in memory; restart their sessions after rotation or when removing access. Calling the helper without an action prints the key for the consuming agent; use `warm` or `status` interactively.
+Add more credentials to `fnox.toml`; the warm command discovers profiles automatically. The CPA key is stored at `agents/cpa1-api-key` in gopass and exposed as `CPA_API_KEY` in the `agents` profile.
+
+Bootstrap and update install `~/.local/bin/fleet-fnox` and configure Pi, Codex, and Claude Code to retrieve the CPA key through it, including when launched by T3 Code. The launcher resolves Fleet's pinned fnox binary from any directory and supplies the gopass adapter, so no global fnox installation or shell export is needed.
+
+Fnox runs a daemon for each profile, all with the same 365-day idle timeout that resets on requests. GPG's one-hour passphrase timeout is unchanged. Secrets stay in memory until the daemon stops, expires, or invalidates its cache after configuration or relevant environment changes. After reboot or a daemon restart, run `mise run secrets warm` again. Fleet writes no decrypted secret cache to disk.
+
+Other arguments pass directly to fnox, for example:
+
+```bash
+mise run secrets -P agents daemon status
+```
+
+`mise run check` reports the agents profile’s daemon status without decrypting secrets. The launcher uses `/tmp` for fnox's temporary-directory fallback so terminal and service launches find the same socket on macOS. Screen lock does not clear the cache, and processes running as your user can retrieve cached secrets. Restart agent sessions after rotating their credentials, since agents may also cache them in memory.
 
 Use secrets by piping them into the command that needs them. Avoid printing decrypted values into agent output:
 
@@ -102,7 +101,7 @@ Compose arguments can select a service, for example `mise run services:up -- cpa
 
 The root `services/compose.yaml` includes a separate file for each service. CPA1 listens on `127.0.0.1:8320`, CPA2 listens on `127.0.0.1:8321`, and PostgreSQL has no published port. `CPA1_PORT` overrides CPA1's port for staging. Runtime files live in `${XDG_DATA_HOME:-$HOME/.local/share}/fleet/services`, with `cpa1/`, `cpa2/`, and `postgres/` subdirectories. Set `FLEET_SERVICES_DATA_DIR` to override this location. Keep database dumps and other migration backups outside Git as well.
 
-The root `fnox.toml` contains references to GPG-encrypted gopass entries under `services/`. Mise configures the repo-local adapter and secret store, so plain `fnox` commands work from Fleet's root with mise shell activation. Without shell activation, use `mise exec -- fnox`. Daemon resolution is disabled here so provider calls inherit the adapter environment. The adapter is needed because fnox's password-store provider invokes `pass`; it forwards those calls to gopass without changing the user's gopass configuration. `scripts/services-fnox` supplies the same configuration for service scripts. GPG must be unlocked before service operations. Only encrypted secret files belong in Fleet; plaintext credentials enter the container environment at runtime.
+The root `fnox.toml` references GPG-encrypted gopass entries under `services/`. Agent and service launchers use the same `scripts/secrets/fnox` launcher and daemon settings. Warm the cache with `mise run secrets warm` before service operations if GPG is locked. The adapter forwards fnox's `pass` calls to gopass without changing the user's gopass configuration. Only encrypted secret files belong in Fleet; service credentials enter the container environment at runtime.
 
 CPA2 migration retains the original k3s PVC and database for rollback. To roll back, stop Compose CPA2 before scaling `cpa2-cliproxyapi` back to one replica in the `local-services` namespace. The retained k3s database reflects the cutover snapshot; changes made after cutover require a fresh export from Compose before rollback.
 
@@ -131,7 +130,7 @@ The `newt` container uses `fosrl/pangolin-cli` with site ID `p946mt1f12e3jgo` an
 Add the site secret from Fleet's root using the hidden prompt:
 
 ```bash
-fnox -P newt set SITE_SECRET --provider gopass --key-name newt/site-secret
+fnox -P newt set SITE_SECRET --provider gopass --key-name services/newt/site-secret
 mise run services:up -- --no-recreate newt
 ```
 
