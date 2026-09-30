@@ -9,6 +9,7 @@ order:
   - pull-requests
   - harness
   - computers
+  - secrets
 
 sections:
   identity: identity.md
@@ -20,6 +21,7 @@ sections:
   blast-radius: blast-radius.md
   pull-requests: pull-requests.md
   computers: computers.md
+  secrets: secrets.md
 
 harness:
   pi: harness/pi.md

@@ -1,6 +1,11 @@
 [tasks.tools]
 description = "Install and activate Fleet's CLI versions"
-run = "mise use --global npm:@openai/codex@0.159.2 pi@0.85.1 claude@2.1.285"
+run = [
+  "mise use --global npm:@openai/codex@0.159.2 pi@0.85.1 claude@2.1.285 gopass@1.17.3",
+  'gopass config mounts.path "{{config_root}}/secrets"',
+  "gopass config core.autosync false",
+  "gopass config core.autopush false",
+]
 
 [tasks.bootstrap]
 description = "Install agent tools, dependencies, and configuration"
