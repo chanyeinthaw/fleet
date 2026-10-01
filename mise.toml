@@ -1,4 +1,5 @@
 [tools]
+python = "3.13.15"
 fnox = "1.35.3"
 stow = "2.4.1"
 

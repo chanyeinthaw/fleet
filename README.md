@@ -182,7 +182,7 @@ Dotfile management is opt-in and runs at the end of bootstrap/update:
 enabled = true
 ```
 
-It defaults to false. Fleet manages only `~/.aws/config`, `~/.aws/credentials`, `~/.ssh/config`, all files under `~/.skm`, `~/.sshed`, and `~/.config/jj/config.toml`, plus its shell source files. Stow 2.4.1 is installed through mise with a repo-local plugin that builds the checksum-pinned GNU release. Perl, Make, and Python 3 are prerequisites on Linux and macOS; Homebrew is not required.
+It defaults to false. Fleet manages only `~/.aws/config`, `~/.aws/credentials`, `~/.ssh/config`, all files under `~/.skm`, `~/.sshed`, and `~/.config/jj/config.toml`, plus its shell source files. Stow 2.4.1 is installed through mise with a repo-local plugin that builds the checksum-pinned GNU release. Python 3.13.15 is managed locally through mise alongside fnox and Stow. Perl and Make are system prerequisites on Linux and macOS; Homebrew is not required.
 
 The entire `dotfiles/` directory is ignored by Git, including AWS configuration, credentials, SSH configuration, SKM filenames and keys, and JJ settings. Its ZIP archive is encrypted with the GPG recipients from the gopass store into `secrets/dotfiles.gpg`. No plaintext ZIP is written to disk. Bootstrap/update decrypt the archive, set private permissions, and run Stow with `--dotfiles --no-folding`. GPG must be unlocked first.
 
