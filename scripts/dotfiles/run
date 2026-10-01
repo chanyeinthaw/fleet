@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+"""Restore or sync the encrypted dotfile archive and install it with Stow."""
+
+import io
+import zipfile
+from datetime import datetime
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+repo = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(repo / "scripts/agents"))
+from fleet_config import read_config
+
+
+def command(args, **kwargs):
+    result = subprocess.run(args, capture_output=True, **kwargs)
+    if result.returncode:
+        raise RuntimeError(f"{args[0]} failed; dotfile operation stopped")
+    return result.stdout
+
+
+def destination(path):
+    return Path.home().joinpath(*(('.' + part[4:]) if part.startswith('dot-') else part for part in path.parts))
+
+
+def atomic_write(path, data, mode):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(dir=path.parent)
+    temporary = Path(name)
+    try:
+        with os.fdopen(fd, "wb") as file:
+            file.write(data)
+        temporary.chmod(mode)
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def install_shell(backup):
+    shell = Path(os.environ.get("SHELL", "")).name
+    if shell not in {"bash", "zsh"}:
+        print("No Bash/Zsh login shell detected; skipping startup block")
+        return
+    shells = [shell]
+    for other in ("bash", "zsh"):
+        startup = Path.home() / f".{other}rc"
+        if other != shell and startup.exists() and "# BEGIN FLEET SHELL" in startup.read_text():
+            shells.append(other)
+    for shell in shells:
+        path = Path.home() / f".{shell}rc"
+        content = path.read_text() if path.exists() else ""
+        start, end = "# BEGIN FLEET SHELL", "# END FLEET SHELL"
+        if content.count(start) != content.count(end) or content.count(start) > 1:
+            raise ValueError(f"Malformed Fleet block in {path}")
+        if start in content:
+            before, rest = content.split(start, 1)
+            _, after = rest.split(end, 1)
+            content = before.rstrip() + "\n" + after.lstrip("\n")
+        block = f'{start}\n[ -r "$HOME/.config/fleet/shell.sh" ] && . "$HOME/.config/fleet/shell.sh"\n{end}\n'
+        updated = content.rstrip() + "\n\n" + block
+        if path.exists() and path.read_text() == updated:
+            continue
+        if path.exists():
+            shutil.copy2(path, backup / path.name)
+        atomic_write(path, updated.encode(), 0o600)
+
+
+def main():
+    if not read_config().get("dotfiles", {}).get("enabled", False):
+        print("Dotfile management disabled")
+        return
+    if sys.argv[1:] not in ([], ["sync"]):
+        raise ValueError("Only sync is supported")
+    os.umask(0o077)
+    archive = repo / "secrets/dotfiles.gpg"
+    root = repo / "dotfiles"
+    if sys.argv[1:] == ["sync"]:
+        payload = io.BytesIO()
+        with zipfile.ZipFile(payload, "w", zipfile.ZIP_DEFLATED) as zipped:
+            for path in sorted(root.rglob("*")):
+                if path.is_symlink():
+                    raise ValueError("Dotfile archive must not contain symlinks")
+                if path.is_file():
+                    relative = path.relative_to(root)
+                    data = path.read_bytes()
+                    zipped.writestr(str(relative), data)
+        recipients = (repo / "secrets/.gpg-id").read_text().splitlines()
+        args = ["gpg", "--batch", "--yes", "--encrypt"]
+        for recipient in recipients:
+            if recipient.strip():
+                args += ["--recipient", recipient.strip()]
+        encrypted = command(args, input=payload.getvalue())
+        verified = command(["gpg", "--batch", "--pinentry-mode", "error", "--decrypt"], input=encrypted)
+        if verified != payload.getvalue():
+            raise ValueError("Archive verification failed")
+        atomic_write(archive, encrypted, 0o600)
+        print("Dotfiles encrypted to secrets/dotfiles.gpg")
+        return
+    payload = command(["gpg", "--batch", "--pinentry-mode", "error", "--decrypt", str(archive)])
+    restored = {}
+    with zipfile.ZipFile(io.BytesIO(payload)) as zipped:
+        for entry in zipped.infolist():
+            path = Path(entry.filename)
+            if path.is_absolute() or ".." in path.parts or (entry.external_attr >> 16) & 0o170000 == 0o120000:
+                raise ValueError("Unsafe dotfile archive entry")
+        for entry in zipped.infolist():
+            if not entry.is_dir():
+                restored[root / entry.filename] = zipped.read(entry)
+    for path, data in restored.items():
+        atomic_write(path, data, 0o600)
+    stow = command(["mise", "which", "stow"]).decode().strip()
+    backup = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local/state")) / "fleet/dotfile-backups" / datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    backup.mkdir(parents=True, mode=0o700)
+    # Back up conflicts before any adoption or replacement, including private files.
+    for target in sorted(root.rglob("*")):
+        if not target.is_file():
+            continue
+        source = destination(target.relative_to(root))
+        if source.is_symlink() and source.resolve() == target.resolve():
+            continue
+        if source.exists() or source.is_symlink():
+            if source.is_dir():
+                raise ValueError(f"Expected a file at {source}; refusing to replace a directory")
+            saved = backup / source.relative_to(Path.home())
+            saved.parent.mkdir(parents=True, exist_ok=True)
+            if source.exists():
+                shutil.copyfile(source, saved)
+                saved.chmod(0o600)
+            else:
+                saved.symlink_to(os.readlink(source))
+            source.unlink()
+
+    command([stow, "--dotfiles", "--no-folding", "--dir", str(repo), "--target", str(Path.home()), "dotfiles"])
+    for path in root.rglob("*"):
+        path.chmod(0o700 if path.is_dir() else 0o600)
+    for name in (".skm", ".aws", ".ssh"):
+        path = Path.home() / name
+        if path.exists():
+            path.chmod(0o700)
+    install_shell(backup)
+    print(f"Dotfiles linked; previous machine files preserved in {backup}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source_dir="$(mktemp -d)"
+trap 'python3 - "$source_dir" <<"PY"
+import shutil,sys
+shutil.rmtree(sys.argv[1])
+PY' EXIT
+curl -fsSL "https://ftp.gnu.org/gnu/stow/stow-${ASDF_INSTALL_VERSION}.tar.gz" -o "$source_dir/stow.tar.gz"
+python3 - "$source_dir/stow.tar.gz" "$ASDF_INSTALL_VERSION" <<'PY'
+import hashlib,sys
+from pathlib import Path
+if sys.argv[2] != "2.4.1" or hashlib.sha256(Path(sys.argv[1]).read_bytes()).hexdigest() != "2a671e75fc207303bfe86a9a7223169c7669df0a8108ebdf1a7fe8cd2b88780b":
+    sys.exit("Stow archive checksum mismatch")
+PY
+tar -xzf "$source_dir/stow.tar.gz" -C "$source_dir"
+cd "$source_dir/stow-${ASDF_INSTALL_VERSION}"
+./configure --prefix="$ASDF_INSTALL_PATH"
+make
+make install

@@ -1,6 +1,9 @@
 [author]
 name = "Chan"
 
+[dotfiles]
+enabled = false
+
 [agents]
 # CPA origin; Fleet appends /v1 for Pi and Codex.
 cpa_url = "https://cpa1.p.si14.space"

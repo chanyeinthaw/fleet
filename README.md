@@ -172,3 +172,24 @@ cpa_secret = "agents/cpa1-api-key"
 Use an origin without `/v1`; Fleet adds that path for Pi and Codex and uses the origin for Claude. Run `mise run link` after changing the URL. The installed secret helper reads the selected secret name at invocation time through fnox. Pi's generated `models.json` is machine-local rather than a link to the shared template. Service configuration and shared templates remain separate from these agent overrides.
 
 `[author].name` defaults to `Chan` and supplies the introduction in each harness's generated agent instructions. Run `mise run link` after changing it.
+
+## Dotfiles
+
+Dotfile management is opt-in and runs at the end of bootstrap/update:
+
+```toml
+[dotfiles]
+enabled = true
+```
+
+It defaults to false. Fleet manages only `~/.aws/config`, `~/.aws/credentials`, `~/.ssh/config`, all files under `~/.skm`, `~/.sshed`, and `~/.config/jj/config.toml`, plus its shell source files. Stow 2.4.1 is installed through mise with a repo-local plugin that builds the checksum-pinned GNU release. Perl, Make, and Python 3 are prerequisites on Linux and macOS; Homebrew is not required.
+
+The entire `dotfiles/` directory is ignored by Git, including AWS configuration, credentials, SSH configuration, SKM filenames and keys, and JJ settings. Its ZIP archive is encrypted with the GPG recipients from the gopass store into `secrets/dotfiles.gpg`. No plaintext ZIP is written to disk. Bootstrap/update decrypt the archive, set private permissions, and run Stow with `--dotfiles --no-folding`. GPG must be unlocked first.
+
+JJ's name and email remain in its encrypted configuration, independent of `.fleetrc`'s author settings.
+
+Edit your linked files or the ignored `dotfiles/` directory, then run `mise run dotfiles:sync` to encrypt the current contents. Sync verifies decryption before replacing the encrypted archive. Run sync before bootstrap/update to preserve local edits, since those commands restore the stored version. Commit the encrypted archive to share the changes across machines.
+
+Normal bootstrap/update use Fleet's files for conflicts, with prior machine files preserved under `${XDG_STATE_HOME:-$HOME/.local/state}/fleet/dotfile-backups`. SSH keys outside `.skm`, AWS caches, and other JJ files are left alone. The directory itself is the Stow package: `dot-config/`, `dot-skm/`, `dot-aws/`, `dot-ssh/`, and `dot-sshed` sit directly under `dotfiles/`. New files join management automatically; there is no manifest.
+
+Shell configuration and aliases, including this machine’s imported startup settings, live in `dotfiles/dot-config/fleet/` and are encrypted with the rest. Bootstrap/update detect the login shell through `SHELL` and maintain a source block in `.bashrc` or `.zshrc` for Bash or Zsh. Both source one `~/.config/fleet/shell.sh` entry point, which loads `exports.sh`, `common.sh`, and `aliases.sh`. Omarchy startup stays in `.bashrc`. Other machine-local startup content is preserved. Disabling management skips future operations without deleting files or links.

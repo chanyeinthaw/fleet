@@ -1,5 +1,6 @@
 [tools]
 fnox = "1.35.3"
+stow = "2.4.1"
 
 [env]
 _.path = ["{{config_root}}/scripts/secrets/adapter"]
@@ -9,7 +10,8 @@ FNOX_DAEMON = "on"
 [tasks.tools]
 description = "Install and activate Fleet's CLI versions"
 run = [
-  "mise install fnox",
+  "./scripts/tools/register-stow",
+  "mise install",
   "mise use --global npm:@openai/codex@0.159.2 pi@0.85.1 claude@2.1.285 gopass@1.17.3",
   'gopass config mounts.path "{{config_root}}/secrets"',
   "gopass config core.autosync false",
@@ -23,6 +25,7 @@ run = [
   "pnpm --dir agents/pi install",
   "./scripts/link",
   "./scripts/check",
+  "./scripts/dotfiles/run",
 ]
 
 [tasks.link]
@@ -44,6 +47,7 @@ run = [
   "pnpm --dir agents/pi install",
   "./scripts/link",
   "./scripts/check",
+  "./scripts/dotfiles/run",
 ]
 
 [tasks."services:up"]
@@ -57,3 +61,7 @@ run = "./scripts/services/run down"
 [tasks."services:restart"]
 description = "Restart Fleet's existing Compose containers"
 run = "./scripts/services/run restart"
+
+[tasks."dotfiles:sync"]
+description = "Encrypt the local dotfiles directory into Fleet’s secret store"
+run = "./scripts/dotfiles/run sync"

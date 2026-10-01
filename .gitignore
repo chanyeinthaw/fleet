@@ -8,6 +8,7 @@ __pycache__/
 .env
 .env.*
 .fleetrc
+/dotfiles/
 *.log
 *.sqlite
 *.sqlite-shm
