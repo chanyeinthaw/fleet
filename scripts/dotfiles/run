@@ -69,6 +69,16 @@ def install_shell(backup):
         atomic_write(path, updated.encode(), 0o600)
 
 
+def prune_backups(root):
+    backups = sorted(
+        (path for path in root.iterdir() if path.is_dir() and not path.is_symlink()),
+        key=lambda path: (path.stat().st_mtime_ns, path.name),
+        reverse=True,
+    )
+    for path in backups[3:]:
+        shutil.rmtree(path)
+
+
 def main():
     if not read_config().get("dotfiles", {}).get("enabled", False):
         print("Dotfile management disabled")
@@ -142,6 +152,7 @@ def main():
         if path.exists():
             path.chmod(0o700)
     install_shell(backup)
+    prune_backups(backup.parent)
     print(f"Dotfiles linked; previous machine files preserved in {backup}")
 
 
