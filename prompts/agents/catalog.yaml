@@ -2,6 +2,7 @@ order:
   - identity
   - coding-general
   - coding-typescript
+  - testing
   - questions
   - ceremony
   - visual-design
@@ -15,6 +16,7 @@ sections:
   identity: identity.md
   coding-general: coding-general.md
   coding-typescript: coding-typescript.md
+  testing: testing.md
   questions: questions.md
   ceremony: ceremony.md
   visual-design: visual-design.md
