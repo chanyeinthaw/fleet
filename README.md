@@ -166,6 +166,7 @@ Use `up` to apply configuration or image changes. `restart` keeps the existing c
 | PostgreSQL | Compose network only |
 | Newt | Pangolin site with host access to both CPAs |
 | Friday | HTTP at `127.0.0.1:4020`, OpenSSH, and Tailscale |
+| Sunday | Discord bot; host networking reaches T3 at `localhost:3773` |
 | Docker-in-Docker | TLS on the private Compose network |
 
 Secrets use separate fnox profiles. The launcher maps each profile's values to Compose variables and injects credentials at runtime. Warm the cache before service operations if GPG is locked.
@@ -192,6 +193,20 @@ mise run services:up -- --build --no-deps friday
 ```
 
 Startup preserves Friday's binary version. Update it separately with `docker exec --user friday friday friday-update`. OpenCode provider overrides live in `friday/pi/provider-overrides.json`; authentication stays in Pi's `auth.json`.
+
+### Sunday
+
+Sunday runs the checksum-verified `v0.0.0-nightly.1` release from `chanyeinthaw/sunday`. Its config is in `services/sunday/sunday.json`, copied from `Projects/t3-bot`. Clone paths refer to the T3 host. The container uses the invoking user's UID/GID, with owner-only pairing credentials and JSON logs in the service data directory's `sunday` folder.
+
+The `sunday` fnox profile supplies its Discord token and CPA key. The launcher uses the host's `gh auth login` token for repository metadata and passes it as a BuildKit secret when downloading the private release.
+
+```sh
+mise run services:up -- --build --no-deps sunday
+```
+
+For initial pairing or an expired session, pipe a fresh normal T3 pairing code to `python scripts/services/compose run --rm --no-deps -T sunday pair`. Existing valid credentials can be copied into the service data directory as `credential.json` with mode `0600` while Sunday is stopped. Normal sessions require pairing again at expiry. Only one running process should use a credential state directory.
+
+Container console logs rotate at 10 MiB with three files retained. The append-only `sunday/logs/sunday.jsonl` file needs separate rotation.
 
 ### Shared Docker daemon
 

@@ -32,3 +32,7 @@ DISCORD_APPLICATION_ID = { provider = "gopass", value = "services/friday/discord
 DISCORD_BOT_TOKEN = { provider = "gopass", value = "services/friday/discord-bot-token" }
 DISCORD_PUBLIC_KEY = { provider = "gopass", value = "services/friday/discord-public-key" }
 TAILSCALE_AUTH_KEY = { provider = "gopass", value = "services/friday/tailscale-auth-key" }
+
+[profiles.sunday.secrets]
+CPA_API_KEY = { provider = "gopass", value = "agents/cpa1-api-key" }
+DISCORD_BOT_TOKEN = { provider = "gopass", value = "services/sunday/discord-bot-token" }

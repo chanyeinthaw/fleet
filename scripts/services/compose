@@ -10,7 +10,7 @@ import sys
 repo = Path(__file__).resolve().parents[2]
 env = os.environ.copy()
 env.setdefault("FLEET_SERVICES_DATA_DIR", str(Path(env.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "fleet/services"))
-for profile in ("postgres", "cpa1", "cpa2", "newt", "friday"):
+for profile in ("postgres", "cpa1", "cpa2", "newt", "friday", "sunday"):
     result = subprocess.run(
         [str(repo / "scripts/secrets/fnox"), "-P", profile, "export", "--format", "json"],
         capture_output=True,
@@ -21,5 +21,13 @@ for profile in ("postgres", "cpa1", "cpa2", "newt", "friday"):
     for name, value in secrets.items():
         key = name if profile == "postgres" else f"{profile.upper()}_{name}"
         env[key] = value
+
+env.setdefault("SUNDAY_UID", str(os.getuid()))
+env.setdefault("SUNDAY_GID", str(os.getgid()))
+if not env.get("SUNDAY_GITHUB_TOKEN"):
+    result = subprocess.run(["gh", "auth", "token"], capture_output=True)
+    if result.returncode:
+        sys.exit("Could not resolve Sunday's GitHub token; check gh auth login.")
+    env["SUNDAY_GITHUB_TOKEN"] = result.stdout.decode().strip()
 
 os.execvpe("docker", ["docker", "compose", "--file", str(repo / "services/compose.yaml"), *sys.argv[1:]], env)

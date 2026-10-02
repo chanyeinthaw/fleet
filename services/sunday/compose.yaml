@@ -1,0 +1,34 @@
+services:
+  sunday:
+    container_name: sunday
+    image: fleet/sunday:nightly.1
+    build:
+      context: image
+      args:
+        SUNDAY_VERSION: v0.0.0-nightly.1
+      secrets: [sunday-github-token]
+    restart: unless-stopped
+    network_mode: host
+    user: "${SUNDAY_UID:-1000}:${SUNDAY_GID:-1000}"
+    environment:
+      SUNDAY_CONFIG: /etc/sunday/sunday.json
+      CPA_API_KEY: ${SUNDAY_CPA_API_KEY:?required by fnox}
+      DISCORD_BOT_TOKEN: ${SUNDAY_DISCORD_BOT_TOKEN:?required by fnox}
+      GH_TOKEN: ${SUNDAY_GITHUB_TOKEN:?resolved from gh auth login}
+    volumes:
+      - type: bind
+        source: ./sunday.json
+        target: /etc/sunday/sunday.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/sunday:/var/lib/sunday
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+secrets:
+  sunday-github-token:
+    environment: SUNDAY_GITHUB_TOKEN
