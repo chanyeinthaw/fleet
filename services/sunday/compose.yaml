@@ -1,11 +1,11 @@
 services:
   sunday:
     container_name: sunday
-    image: fleet/sunday:nightly.3
+    image: fleet/sunday:nightly.4
     build:
       context: image
       args:
-        SUNDAY_VERSION: v0.0.0-nightly.3
+        SUNDAY_VERSION: v0.0.0-nightly.4
       secrets: [sunday-github-token]
     restart: unless-stopped
     network_mode: host

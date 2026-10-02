@@ -196,7 +196,9 @@ Startup preserves Friday's binary version. Update it separately with `docker exe
 
 ### Sunday
 
-Sunday runs the checksum-verified `v0.0.0-nightly.3` release from `chanyeinthaw/sunday`. Its config is in `services/sunday/sunday.json`, copied from `Projects/t3-bot`. Clone paths refer to the T3 host. The container uses the invoking user's UID/GID, with owner-only pairing credentials and JSON logs in the service data directory's `sunday` folder.
+Sunday runs the checksum-verified `v0.0.0-nightly.4` release from `chanyeinthaw/sunday`. Its config is in `services/sunday/sunday.json`, copied from `Projects/t3-bot`. Clone paths refer to the T3 host. The container uses the invoking user's UID/GID, with owner-only pairing credentials and JSON logs in the service data directory's `sunday` folder.
+
+Coding tasks use T3's project or environment default model and options; configure those in T3. Sunday's internal preparation model remains configured under `llm`.
 
 The landing server listens on `127.0.0.1:3785`; Discord app links use `https://sunday.p.si14.space`. Route that hostname through Pangolin to `http://127.0.0.1:3785`.
 
