@@ -19,7 +19,15 @@ from fleet_config import read_config
 def command(args, **kwargs):
     result = subprocess.run(args, capture_output=True, **kwargs)
     if result.returncode:
-        raise RuntimeError(f"{args[0]} failed; dotfile operation stopped")
+        detail = result.stderr.decode(errors="replace").strip()
+        message = f"{args[0]} failed; dotfile operation stopped"
+        if detail:
+            message += f"\n{detail}"
+        if args[0] == "gpg" and "--decrypt" in args:
+            message += "\nDotfile decryption requires an installed, unlocked GPG private key."
+            message += f"\nTo unlock it, run: gpg --decrypt --output /dev/null {repo / 'secrets/dotfiles.gpg'}"
+            message += "\nThen retry the Fleet command."
+        raise RuntimeError(message)
     return result.stdout
 
 
@@ -157,4 +165,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (RuntimeError, ValueError, OSError, zipfile.BadZipFile) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        sys.exit(1)
