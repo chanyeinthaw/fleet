@@ -2,7 +2,7 @@
 FROM debian:bookworm-slim AS download
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates gh \
     && rm -rf /var/lib/apt/lists/*
-ARG SUNDAY_VERSION=v0.0.0-nightly.2
+ARG SUNDAY_VERSION=v0.0.0-nightly.3
 WORKDIR /release
 RUN --mount=type=secret,id=sunday-github-token,env=GH_TOKEN,required=true \
     gh release download "$SUNDAY_VERSION" --repo chanyeinthaw/sunday \

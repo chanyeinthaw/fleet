@@ -40,5 +40,9 @@
   "logging": {
     "file": "/var/lib/sunday/logs/sunday.jsonl",
     "level": "Info"
+  },
+  "landing": {
+    "port": 3785,
+    "publicUrl": "https://sunday.p.si14.space"
   }
 }
