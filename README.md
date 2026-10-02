@@ -196,7 +196,7 @@ Startup preserves Friday's binary version. Update it separately with `docker exe
 
 ### Sunday
 
-Sunday runs the checksum-verified `v0.0.0-nightly.1` release from `chanyeinthaw/sunday`. Its config is in `services/sunday/sunday.json`, copied from `Projects/t3-bot`. Clone paths refer to the T3 host. The container uses the invoking user's UID/GID, with owner-only pairing credentials and JSON logs in the service data directory's `sunday` folder.
+Sunday runs the checksum-verified `v0.0.0-nightly.2` release from `chanyeinthaw/sunday`. Its config is in `services/sunday/sunday.json`, copied from `Projects/t3-bot`. Clone paths refer to the T3 host. The container uses the invoking user's UID/GID, with owner-only pairing credentials and JSON logs in the service data directory's `sunday` folder.
 
 The `sunday` fnox profile supplies its Discord token and CPA key. The launcher uses the host's `gh auth login` token for repository metadata and passes it as a BuildKit secret when downloading the private release.
 
