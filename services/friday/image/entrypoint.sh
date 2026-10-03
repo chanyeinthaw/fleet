@@ -52,7 +52,7 @@ export GH_CONFIG_DIR=/home/friday/.config/gh
 export MISE_DATA_DIR=/home/friday/.local/share/mise
 export MISE_CONFIG_DIR=/home/friday/.config/mise
 export MISE_CACHE_DIR=/home/friday/.cache/mise
-export PATH="/home/friday/.local/share/mise/installs/node/26.7.0/bin:/home/friday/.local/share/mise/installs/bun/1.3.14/bin:/home/friday/.local/share/mise/installs/npm-pnpm/10.33.0/node_modules/.bin:/home/friday/.local/share/mise/installs/pi/0.85.1/pi:/home/friday/.local/share/mise/installs/pi/0.85.1:/home/friday/.local/bin:/home/friday/.local/share/mise/shims:${PATH}"
+export PATH="/home/friday/.local/share/mise/installs/node/26.7.0/bin:/home/friday/.local/share/mise/installs/bun/1.3.14/bin:/home/friday/.local/share/mise/installs/npm-pnpm/10.33.0/node_modules/.bin:/home/friday/.local/share/mise/installs/pi/1.0.0/pi:/home/friday/.local/share/mise/installs/pi/1.0.0:/home/friday/.local/bin:/home/friday/.local/share/mise/shims:${PATH}"
 
 SSH_KEY_DIR="${HOME}/.ssh"
 

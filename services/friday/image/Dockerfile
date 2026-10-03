@@ -36,7 +36,7 @@ ENV LANG=C.UTF-8 \
     MISE_CONFIG_DIR=/home/friday/.config/mise \
     MISE_CACHE_DIR=/home/friday/.cache/mise \
     FRIDAY_BOOTSTRAP_VERSION=${FRIDAY_VERSION} \
-    PATH=/home/friday/.friday/bin:/home/friday/.local/share/mise/installs/node/26.7.0/bin:/home/friday/.local/share/mise/installs/bun/1.3.14/bin:/home/friday/.local/share/mise/installs/npm-pnpm/10.33.0/node_modules/.bin:/home/friday/.local/share/mise/installs/pi/0.85.1/pi:/home/friday/.local/share/mise/installs/pi/0.85.1:/home/friday/.local/bin:/home/friday/.local/share/mise/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    PATH=/home/friday/.friday/bin:/home/friday/.local/share/mise/installs/node/26.7.0/bin:/home/friday/.local/share/mise/installs/bun/1.3.14/bin:/home/friday/.local/share/mise/installs/npm-pnpm/10.33.0/node_modules/.bin:/home/friday/.local/share/mise/installs/pi/1.0.0/pi:/home/friday/.local/share/mise/installs/pi/1.0.0:/home/friday/.local/bin:/home/friday/.local/share/mise/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 

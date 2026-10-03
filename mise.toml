@@ -13,7 +13,7 @@ description = "Install and activate Fleet's CLI versions"
 run = [
   "./scripts/tools/register-stow",
   "mise install",
-  "mise use --global npm:@openai/codex@0.159.2 pi@0.85.1 claude@2.1.285 gopass@1.17.3",
+  "mise use --global npm:@openai/codex@0.160.0 pi@1.0.0 claude@2.1.287 gopass@1.17.3",
   'gopass config mounts.path "{{config_root}}/secrets"',
   "gopass config core.autosync false",
   "gopass config core.autopush false",

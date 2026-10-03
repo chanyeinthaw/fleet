@@ -19,7 +19,7 @@
     "prepare": "effect-tsgo patch --typescript --oxlint"
   },
   "dependencies": {
-    "@earendil-works/pi-coding-agent": "^0.74.0",
+    "@earendil-works/pi-coding-agent": "^1.0.0",
     "@effect/platform-node": "4.0.0-beta.103",
     "effect": "4.0.0-beta.103"
   },
