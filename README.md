@@ -11,7 +11,7 @@ cd ~/fleet
 mise run bootstrap
 ```
 
-Bootstrap installs tools, Pi dependencies, and agent configuration. It also installs dotfiles when enabled in `.fleetrc`. It never starts or stops services.
+Bootstrap installs tools, Pi dependencies, and agent configuration. It also installs dotfiles when enabled in `.fleetrc` and reconciles the opted-in Tether user service. Compose services remain separate.
 
 ```sh
 mise run update  # Refresh tools and configuration
@@ -35,11 +35,14 @@ cpa_secret = "agents/cpa1-api-key"
 
 [dotfiles]
 enabled = false
+
+[tether]
+enabled = false
 ```
 
 These are the defaults. On a machine hosting CPA1, use `http://127.0.0.1:8320` instead. Supply the origin without `/v1`; Fleet adds it where needed.
 
-Run `mise run link` after changing the author name or CPA URL. The secret helper reads the selected secret name when invoked. These settings affect agents, not services. JJ's identity lives in its encrypted config and is independent of `[author]`.
+Run `mise run link` after changing the author name or CPA URL. The secret helper reads the selected secret name when invoked. The author and CPA settings affect agents. JJ's identity lives in its encrypted config and is independent of `[author]`.
 
 ## Agents and skills
 
@@ -143,6 +146,39 @@ mise run dotfiles:sync
 Sync before bootstrap/update, since those commands restore the archived version. Commit the updated archive to share your edits. New files under `dotfiles/` are picked up automatically. AWS caches, SSH keys outside `.skm`, and other JJ files remain unmanaged unless added there.
 
 Fleet adds a source block to `.bashrc` or `.zshrc` based on `SHELL`. Both load `~/.config/fleet/shell.sh`, which sources exports, common functions, aliases, and completions. Existing startup content is preserved; Omarchy startup stays in `.bashrc`. Disabling dotfile management skips future installs without removing links.
+
+## Tether
+
+[Tether](https://github.com/chanyeinthaw/tether) monitors Linux Wi-Fi through NetworkManager's D-Bus API, switches between saved profiles in priority order, and limits radio resets to three per outage. Connection attempts continue after resets are exhausted, so restarting the router does not require logging into the machine.
+
+Opt in per machine in the gitignored `.fleetrc`:
+
+```toml
+[dotfiles]
+enabled = true
+
+[tether]
+enabled = true
+```
+
+Configure the interface and ordered UUID/SSID pairs in `dotfiles/dot-config/tether/config.json`. Wi-Fi passwords remain in saved NetworkManager profiles. Omit `state_file` to use `~/.local/state/tether/state.json`. Sync the encrypted archive before bootstrap/update, which restores the archived dotfiles:
+
+```sh
+mise run dotfiles:sync
+mise run update
+```
+
+Bootstrap and update install the pinned, checksum-verified release from `scripts/tether/release.json`, install `~/.config/systemd/user/tether.service`, and enable/start it. They restart it only when the binary, configuration, or unit changed. An invalid configuration or failed candidate check prevents replacement of a running binary.
+
+The first enabled run requires administrator authorization to install a root-owned Polkit rule for the invoking user and enable lingering. The rule permits NetworkManager connection control, Wi-Fi scans, and radio toggles without a desktop session. These permissions apply to that user beyond Tether's whitelist. Linux ping sockets need no capabilities; if the user's primary group is excluded from `net.ipv4.ping_group_range`, setup expands the existing range and persists it. Setup is recorded in local Fleet state, so unchanged updates do not request administrator access again.
+
+Missing or `enabled = false` skips installation. If Fleet already manages the user unit, it stops and disables it while preserving the binary, configuration, recovery budget, and one-time system authorization. Other machines receive no system changes while disabled. Tether requires Linux; opting in on another OS fails with an explanation.
+
+```sh
+systemctl --user status tether.service
+journalctl --user -u tether.service -f
+cat ~/.local/state/tether/state.json
+```
 
 ## Services
 

@@ -1,0 +1,8 @@
+{
+  "repo": "chanyeinthaw/tether",
+  "version": "v0.1.0",
+  "sha256": {
+    "amd64": "9d8343eb3fca0d096dd79f912d5ced5f445b7590ec5f758007b61f6bbbca4d1e",
+    "arm64": "1704a6d63e2837ce1caeee333d5292621001af4bc949657133b7585a9361c6a5"
+  }
+}

@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Install Tether's user-specific authorization and enable unattended startup."""
+
+import json
+import os
+from pathlib import Path
+import pwd
+import subprocess
+import sys
+import tempfile
+
+
+def rule_for(uid):
+    user = pwd.getpwuid(uid).pw_name
+    return """// Managed by Fleet: tether
+polkit.addRule(function(action, subject) {
+    if (subject.user === %s && [
+        "org.freedesktop.NetworkManager.network-control",
+        "org.freedesktop.NetworkManager.enable-disable-wifi",
+        "org.freedesktop.NetworkManager.wifi.scan"
+    ].indexOf(action.id) !== -1) {
+        return polkit.Result.YES;
+    }
+});
+""" % json.dumps(user)
+
+
+def write_if_changed(path, text):
+    if path.is_symlink():
+        raise ValueError(f"Refusing to replace symlink {path}")
+    if path.exists() and path.read_text() == text:
+        path.chmod(0o644)
+        os.chown(path, 0, 0)
+        return
+    if path.exists() and "Managed by Fleet: tether" not in path.read_text():
+        raise ValueError(f"Refusing to replace unmanaged file {path}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, name = tempfile.mkstemp(dir=path.parent)
+    try:
+        with os.fdopen(fd, "w") as file:
+            file.write(text)
+        os.chmod(name, 0o644)
+        os.replace(name, path)
+    finally:
+        Path(name).unlink(missing_ok=True)
+
+
+def main():
+    if os.geteuid() != 0 or len(sys.argv) != 2:
+        raise ValueError("Run setup as root with the target user's UID")
+    uid = int(sys.argv[1])
+    if uid == 0:
+        raise ValueError("Tether must run as a regular user")
+    user = pwd.getpwuid(uid)
+    write_if_changed(Path(f"/etc/polkit-1/rules.d/49-fleet-tether-{uid}.rules"), rule_for(uid))
+    first, last = map(int, Path("/proc/sys/net/ipv4/ping_group_range").read_text().split())
+    if not first <= user.pw_gid <= last:
+        # Expand the existing allowed range without revoking other users' access.
+        low, high = (min(first, user.pw_gid), max(last, user.pw_gid)) if first <= last else (user.pw_gid, user.pw_gid)
+        setting = f"# Managed by Fleet: tether\nnet.ipv4.ping_group_range = {low} {high}\n"
+        path = Path(f"/etc/sysctl.d/90-fleet-tether-{uid}.conf")
+        write_if_changed(path, setting)
+        subprocess.run(["sysctl", "-p", str(path)], check=True)
+    subprocess.run(["loginctl", "enable-linger", user.pw_name], check=True)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, subprocess.CalledProcessError) as error:
+        print(f"Tether setup failed: {error}", file=sys.stderr)
+        sys.exit(1)

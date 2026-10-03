@@ -16,8 +16,8 @@ DEFAULT_SECRET = "agents/cpa1-api-key"
 def read_config():
     path = REPO / ".fleetrc"
     config = tomllib.loads(path.read_text()) if path.exists() else {}
-    if set(config) - {"agents", "author", "dotfiles"}:
-        raise ValueError(".fleetrc supports the agents, author, and dotfiles sections")
+    if set(config) - {"agents", "author", "dotfiles", "tether"}:
+        raise ValueError(".fleetrc supports the agents, author, dotfiles, and tether sections")
     author = config.get("author", {})
     if not isinstance(author, dict) or set(author) - {"name"}:
         raise ValueError(".fleetrc author supports name")
@@ -27,6 +27,9 @@ def read_config():
     dotfiles = config.get("dotfiles", {})
     if not isinstance(dotfiles, dict) or set(dotfiles) - {"enabled"} or not isinstance(dotfiles.get("enabled", False), bool):
         raise ValueError(".fleetrc dotfiles supports enabled = true or false")
+    tether = config.get("tether", {})
+    if not isinstance(tether, dict) or set(tether) - {"enabled"} or not isinstance(tether.get("enabled", False), bool):
+        raise ValueError(".fleetrc tether supports enabled = true or false")
     return config
 
 

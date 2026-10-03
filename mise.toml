@@ -27,6 +27,7 @@ run = [
   "./scripts/link",
   "./scripts/check",
   "./scripts/dotfiles/run",
+  "./scripts/tether/run",
 ]
 
 [tasks.link]
@@ -49,6 +50,7 @@ run = [
   "./scripts/link",
   "./scripts/check",
   "./scripts/dotfiles/run",
+  "./scripts/tether/run",
 ]
 
 [tasks."services:up"]
