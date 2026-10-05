@@ -1,7 +1,7 @@
 services:
   friday:
     container_name: friday
-    image: fleet/friday:nightly.48
+    image: fleet/friday:nightly.49
     build:
       context: ../..
       dockerfile: services/friday/image/Dockerfile

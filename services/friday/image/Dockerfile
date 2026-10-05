@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-ARG FRIDAY_VERSION=v0.0.0-nightly.48
+ARG FRIDAY_VERSION=v0.0.0-nightly.49
 ARG FRIDAY_TARGET=linux-x64
 
 FROM docker:29.7.2-cli AS docker-cli
