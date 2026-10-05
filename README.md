@@ -151,6 +151,8 @@ Fleet adds a source block to `.bashrc` or `.zshrc` based on `SHELL`. Both load `
 
 [Tether](https://github.com/chanyeinthaw/tether) monitors Linux Wi-Fi through NetworkManager's D-Bus API, switches between saved profiles in priority order, and limits radio resets to three per outage. Connection attempts continue after resets are exhausted, so restarting the router does not require logging into the machine.
 
+While on a healthy fallback, Tether checks for higher-priority networks once a minute. It switches back when a preferred network appears and passes its health checks. A failed attempt restores the previous fallback and delays further priority checks for five minutes. Configure these timings with `priority_check_interval` and `priority_retry_interval` in `config.json`.
+
 Opt in per machine in the gitignored `.fleetrc`:
 
 ```toml
