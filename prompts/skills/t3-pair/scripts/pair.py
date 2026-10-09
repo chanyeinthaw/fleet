@@ -66,7 +66,7 @@ def issue_admin(cli, base_dir, label):
         links = request("/api/auth/pairing-links")
         entries = links if isinstance(links, list) else links["pairingLinks"]
         match = next((entry for entry in entries if entry["id"] == pairing["id"]), None)
-        if match is None or set(match["scopes"]) != set(scopes):
+        if match is None or set(match.get("permissions", match["scopes"])) != set(scopes):
             raise RuntimeError("Created pairing code failed scope verification")
         return {**pairing, "scopes": scopes}
     finally:

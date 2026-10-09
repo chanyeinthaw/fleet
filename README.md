@@ -234,7 +234,7 @@ Startup preserves Friday's binary version. Update it separately with `docker exe
 
 ### Sunday
 
-Sunday runs the checksum-verified `v0.0.0-nightly.5` release from `chanyeinthaw/sunday`. Its config is in `services/sunday/sunday.json`, copied from `Projects/t3-bot`. Clone paths refer to the T3 host. The container uses the invoking user's UID/GID, with owner-only pairing credentials and JSON logs in the service data directory's `sunday` folder.
+Sunday runs the checksum-verified `v0.0.0-nightly.6` release from `chanyeinthaw/sunday`. Its config is in `services/sunday/sunday.json`, copied from `Projects/t3-bot`. Clone paths refer to the T3 host. The container uses the invoking user's UID/GID, with owner-only pairing credentials and JSON logs in the service data directory's `sunday` folder.
 
 Coding tasks use T3's project or environment default model and options; configure those in T3. Sunday's internal preparation model remains configured under `llm`. T3 nightly requires orchestration protocol 2, which Sunday announces on its WebSocket connections. Existing paired sessions can launch tasks in registered projects; cloning requires re-pairing with `source-control:write` in addition to the two orchestration permissions.
 
@@ -246,7 +246,7 @@ The `sunday` fnox profile supplies its Discord token and CPA key. The launcher u
 mise run services:up -- --build --no-deps sunday
 ```
 
-For initial pairing or an expired session, pipe a fresh normal T3 pairing code to `python scripts/services/compose run --rm --no-deps -T sunday pair`. Existing valid credentials can be copied into the service data directory as `credential.json` with mode `0600` while Sunday is stopped. Normal sessions require pairing again at expiry. Only one running process should use a credential state directory.
+For initial pairing or an expired session, pipe a fresh normal T3 pairing code to `python scripts/services/compose run --rm --no-deps -T sunday pair`. Existing valid credentials can be copied into the service data directory as `credential.json` with mode `0600` while Sunday is stopped. Normal sessions require pairing again at expiry. Sunday is configured with an administrative session for automatic renewal; renewal preserves the full permission grant. Only one running process should use a credential state directory.
 
 Container console logs rotate at 10 MiB with three files retained. The append-only `sunday/logs/sunday.jsonl` file needs separate rotation.
 
