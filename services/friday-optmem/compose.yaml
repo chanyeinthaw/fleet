@@ -1,7 +1,7 @@
 services:
   friday-optmem:
     container_name: friday-optmem
-    image: ${OPTMEM_IMAGE:-ghcr.io/chanyeinthaw/friday-optmem:optmem-v0.0.0-nightly.1}
+    image: ${OPTMEM_IMAGE:-ghcr.io/chanyeinthaw/friday-optmem:optmem-v0.0.0-nightly.2}
     restart: unless-stopped
     env_file:
       - ${FLEET_SERVICES_DATA_DIR}/friday-optmem/runtime.env

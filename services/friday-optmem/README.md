@@ -13,7 +13,7 @@ Run `scripts/services/optmem configure` to write owner-only runtime files under
 
 ## Deploy
 
-Run `scripts/services/optmem update optmem-v0.0.0-nightly.1` to deploy a release.
+Run `scripts/services/optmem update optmem-v0.0.0-nightly.2` to deploy a release.
 Omit the tag to select the latest Optmem release.
 The updater reads the release's `IMAGE` asset and pulls that immutable digest.
 It stops only Friday Optmem before backing up its SQLite volume.
