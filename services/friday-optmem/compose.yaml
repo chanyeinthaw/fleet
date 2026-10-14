@@ -1,0 +1,48 @@
+services:
+  friday-optmem:
+    container_name: friday-optmem
+    image: ${OPTMEM_IMAGE:-ghcr.io/chanyeinthaw/friday-optmem:optmem-v0.0.0-nightly.1}
+    restart: unless-stopped
+    env_file:
+      - ${FLEET_SERVICES_DATA_DIR}/friday-optmem/runtime.env
+    environment:
+      WEDNESDAY_HOST: 0.0.0.0
+      WEDNESDAY_PORT: '3002'
+      WEDNESDAY_DATABASE: /data/friday.sqlite
+      WEDNESDAY_ORIGIN: https://friday.si14.space
+    ports:
+      - 127.0.0.1:3003:3002
+    volumes:
+      - optmem-data:/data
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, http://127.0.0.1:3002/health]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+  friday-optmem-tunnel:
+    container_name: friday-optmem-tunnel
+    image: cloudflare/cloudflared:2026.10.0@sha256:9b49eed8f62806d5d45ddf59ecefb5710429598ea6d3fcccd2af938f621b2b07
+    restart: unless-stopped
+    command: [tunnel, --no-autoupdate, run]
+    env_file:
+      - ${FLEET_SERVICES_DATA_DIR}/friday-optmem/tunnel.env
+    depends_on:
+      friday-optmem:
+        condition: service_healthy
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+volumes:
+  optmem-data:
