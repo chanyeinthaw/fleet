@@ -1,15 +1,15 @@
 services:
-  friday-optmem:
-    container_name: friday-optmem
-    image: ${OPTMEM_IMAGE:-ghcr.io/chanyeinthaw/friday-optmem:optmem-v0.0.0-nightly.3}
+  unfold:
+    container_name: unfold
+    image: ${UNFOLD_IMAGE:-ghcr.io/chanyeinthaw/unfold:v0.0.0-nightly.1}
     restart: unless-stopped
     env_file:
-      - ${FLEET_SERVICES_DATA_DIR}/friday-optmem/runtime.env
+      - ${FLEET_SERVICES_DATA_DIR}/unfold/runtime.env
     environment:
-      WEDNESDAY_HOST: 0.0.0.0
-      WEDNESDAY_PORT: '3002'
-      WEDNESDAY_DATABASE: /data/friday.sqlite
-      WEDNESDAY_ORIGIN: https://friday.si14.space
+      UNFOLD_HOST: 0.0.0.0
+      UNFOLD_PORT: '3002'
+      UNFOLD_DATABASE: /data/friday.sqlite
+      UNFOLD_ORIGIN: https://unfold.si14.space
     ports:
       - 127.0.0.1:3003:3002
     volumes:
@@ -27,15 +27,15 @@ services:
       options:
         max-size: 10m
         max-file: '3'
-  friday-optmem-tunnel:
-    container_name: friday-optmem-tunnel
+  unfold-tunnel:
+    container_name: unfold-tunnel
     image: cloudflare/cloudflared:2026.10.0@sha256:9b49eed8f62806d5d45ddf59ecefb5710429598ea6d3fcccd2af938f621b2b07
     restart: unless-stopped
     command: [tunnel, --no-autoupdate, run]
     env_file:
-      - ${FLEET_SERVICES_DATA_DIR}/friday-optmem/tunnel.env
+      - ${FLEET_SERVICES_DATA_DIR}/unfold/tunnel.env
     depends_on:
-      friday-optmem:
+      unfold:
         condition: service_healthy
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
@@ -46,3 +46,5 @@ services:
         max-file: '3'
 volumes:
   optmem-data:
+    external: true
+    name: fleet-services_optmem-data

@@ -1,5 +1,5 @@
 [Unit]
-Description=Check for Friday Optmem releases
+Description=Check for Unfold releases
 
 [Timer]
 OnBootSec=2min

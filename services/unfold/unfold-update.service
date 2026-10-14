@@ -1,9 +1,9 @@
 [Unit]
-Description=Update Friday Optmem from GitHub Releases
+Description=Update Unfold from GitHub Releases
 After=network-online.target
 
 [Service]
 Type=oneshot
 Environment="PATH=%h/.local/share/mise/shims:/usr/local/bin:/usr/bin:/bin"
-ExecStart=%h/fleet/scripts/services/optmem update
+ExecStart=%h/fleet/scripts/services/unfold update
 TimeoutStartSec=15min

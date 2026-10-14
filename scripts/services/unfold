@@ -3,7 +3,7 @@ set -euo pipefail
 
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 export FLEET_SERVICES_DATA_DIR="${FLEET_SERVICES_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/fleet/services}"
-state="$FLEET_SERVICES_DATA_DIR/friday-optmem"
+state="$FLEET_SERVICES_DATA_DIR/unfold"
 mkdir -p -m 700 "$state"
 exec 9>"$state/deploy.lock"
 flock -n 9 || exit 0
@@ -11,55 +11,55 @@ umask 077
 
 case "${1:-update}" in
   configure)
-    gopass show --noparsing services/friday-optmem/production-env > "$state/runtime.env.next"
+    gopass show --noparsing services/unfold/production-env > "$state/runtime.env.next"
     test -s "$state/runtime.env.next"
     mv "$state/runtime.env.next" "$state/runtime.env"
-    { printf 'TUNNEL_TOKEN='; gopass show --noparsing services/friday-optmem/tunnel-token; printf '\n'; } > "$state/tunnel.env.next"
+    { printf 'TUNNEL_TOKEN='; gopass show --noparsing services/unfold/tunnel-token; printf '\n'; } > "$state/tunnel.env.next"
     mv "$state/tunnel.env.next" "$state/tunnel.env"
     exit 0
     ;;
   update) ;;
-  *) printf 'Usage: %s configure|update [optmem-vX.Y.Z-nightly.N]\n' "$0" >&2; exit 1 ;;
+  *) printf 'Usage: %s configure|update [vX.Y.Z-nightly.N]\n' "$0" >&2; exit 1 ;;
 esac
 
 tag="${2:-}"
 if [[ -z "$tag" ]]; then
-  tag="$(gh api repos/chanyeinthaw/friday/releases --paginate --jq '.[] | select(.draft == false) | .tag_name' | { grep -E '^optmem-v[0-9]+\.[0-9]+\.[0-9]+(-nightly\.[0-9]+)?$' || true; } | sort -V | tail -1)"
+  tag="$(gh api repos/chanyeinthaw/unfold/releases --paginate --jq '.[] | select(.draft == false) | .tag_name' | { grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-nightly\.[0-9]+)?$' || true; } | sort -V | tail -1)"
 fi
-[[ "$tag" =~ ^optmem-v[0-9]+\.[0-9]+\.[0-9]+(-nightly\.[0-9]+)?$ ]] || { printf 'No valid Optmem release found.\n' >&2; exit 1; }
+[[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-nightly\.[0-9]+)?$ ]] || { printf 'No valid Unfold release found.\n' >&2; exit 1; }
 if [[ -f "$state/version" && "$(cat "$state/version")" == "$tag" ]]; then exit 0; fi
 
 temporary="$(mktemp -d "$state/release.XXXXXX")"
 trap 'rm -rf "$temporary"' EXIT
-gh release download "$tag" --repo chanyeinthaw/friday --pattern IMAGE --dir "$temporary"
+gh release download "$tag" --repo chanyeinthaw/unfold --pattern IMAGE --dir "$temporary"
 image="$(cat "$temporary/IMAGE")"
-[[ "$image" =~ ^ghcr.io/chanyeinthaw/friday-optmem@sha256:[a-f0-9]{64}$ ]] || { printf 'Invalid release image digest.\n' >&2; exit 1; }
-export OPTMEM_IMAGE="$image"
+[[ "$image" =~ ^ghcr.io/chanyeinthaw/unfold@sha256:[a-f0-9]{64}$ ]] || { printf 'Invalid release image digest.\n' >&2; exit 1; }
+export UNFOLD_IMAGE="$image"
 docker pull "$image"
-compose=(docker compose -p fleet-services -f "$repo/services/friday-optmem/compose.yaml")
+compose=(docker compose -p fleet-services -f "$repo/services/unfold/compose.yaml")
 previous=""
 if [[ -f "$state/image" ]]; then previous="$(cat "$state/image")"; fi
 # Back up the SQLite database and WAL together while this service is stopped.
 if [[ -n "$previous" ]]; then
-  "${compose[@]}" stop friday-optmem
+  "${compose[@]}" stop unfold
   if ! docker run --rm --entrypoint /bin/sh --user 0 -v fleet-services_optmem-data:/data:ro -v "$state":/backup "$previous" -c 'tar -C /data -czf /backup/database-before-update.tar.gz .'; then
-    OPTMEM_IMAGE="$previous" "${compose[@]}" up -d --wait --wait-timeout 120 friday-optmem
+    UNFOLD_IMAGE="$previous" "${compose[@]}" up -d --wait --wait-timeout 120 unfold
     printf 'Database backup failed; previous image restarted.\n' >&2
     exit 1
   fi
 fi
-if ! "${compose[@]}" up -d --wait --wait-timeout 120 friday-optmem friday-optmem-tunnel; then
+if ! "${compose[@]}" up -d --wait --wait-timeout 120 unfold unfold-tunnel; then
   if [[ -n "$previous" ]]; then
-    "${compose[@]}" stop friday-optmem
+    "${compose[@]}" stop unfold
     docker run --rm --entrypoint /bin/sh --user 0 -v fleet-services_optmem-data:/data -v "$state":/backup:ro "$previous" -c 'find /data -mindepth 1 -maxdepth 1 -exec rm -rf {} +; tar -C /data -xzf /backup/database-before-update.tar.gz'
-    export OPTMEM_IMAGE="$previous"
-    "${compose[@]}" up -d --wait --wait-timeout 120 friday-optmem friday-optmem-tunnel
+    export UNFOLD_IMAGE="$previous"
+    "${compose[@]}" up -d --wait --wait-timeout 120 unfold unfold-tunnel
   fi
-  printf 'Optmem deployment failed; previous image restored when available.\n' >&2
+  printf 'Unfold deployment failed; previous image restored when available.\n' >&2
   exit 1
 fi
 printf '%s\n' "$image" > "$state/image.next"
 printf '%s\n' "$tag" > "$state/version.next"
 mv "$state/image.next" "$state/image"
 mv "$state/version.next" "$state/version"
-printf 'Friday Optmem deployed: %s\n' "$tag"
+printf 'Unfold deployed: %s\n' "$tag"

@@ -1,30 +1,7 @@
-# Friday Optmem
+# Friday web moved to Unfold
 
-Production runs at https://friday.si14.space through a dedicated Cloudflare tunnel.
-The existing Friday CLI service runs separately.
+The web app now lives at https://unfold.si14.space and [chanyeinthaw/unfold](https://github.com/chanyeinthaw/unfold). `friday.si14.space` permanently redirects there, preserving paths and query strings.
 
-## Configure
+Use [the Unfold service](../unfold/README.md) and `scripts/services/unfold`. The former updater timer is disabled and its containers are removed. The production volume, Clerk users, encryption key, and attachment bucket were preserved.
 
-The encrypted `services/friday-optmem/production-env` gopass record contains the Clerk production publishable key, JWT public key, encryption key, and R2 credentials.
-The `services/friday-optmem/tunnel-token` record contains the tunnel credential.
-
-Run `scripts/services/optmem configure` to write owner-only runtime files under
-`~/.local/share/fleet/services/friday-optmem/`.
-
-## Deploy
-
-Run `scripts/services/optmem update optmem-v0.0.0-nightly.3` to deploy a release.
-Omit the tag to select the latest Optmem release.
-The updater reads the release's `IMAGE` asset and pulls that immutable digest.
-It stops only Friday Optmem before backing up its SQLite volume.
-If startup fails, it restores the database backup and previous image.
-The backup remains in `database-before-update.tar.gz` until the next update.
-
-Install the user service and timer from this directory into `~/.config/systemd/user/`,
-then run `systemctl --user daemon-reload` and
-`systemctl --user enable --now friday-optmem-update.timer`.
-The timer checks GitHub Releases every five minutes, with up to 30 seconds of jitter.
-It requires Docker access and an authenticated `gh` CLI.
-
-The database volume is `fleet-services_optmem-data`.
-The app binds to `127.0.0.1:3003` and the tunnel forwards to its container port 3002.
+The original encrypted credentials and deployment state remain available for rollback. The pre-migration database backup is `~/.local/share/fleet/services/unfold/before-unfold-migration.tar.gz`. Restore the previous service definitions from Git before rolling back, and never run both apps against the same volume.
