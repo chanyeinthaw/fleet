@@ -15,8 +15,7 @@ Run `scripts/services/optmem configure` to write owner-only runtime files under
 
 Run `scripts/services/optmem update optmem-v0.0.0-nightly.1` to deploy a release.
 Omit the tag to select the latest Optmem release.
-The updater reads the release's `IMAGE` asset and pulls that immutable digest. If the registry is unavailable, it verifies the published
-Linux archive against `SHA256SUMS` and builds the runtime image locally from that executable.
+The updater reads the release's `IMAGE` asset and pulls that immutable digest.
 It stops only Friday Optmem before backing up its SQLite volume.
 If startup fails, it restores the database backup and previous image.
 The backup remains in `database-before-update.tar.gz` until the next update.

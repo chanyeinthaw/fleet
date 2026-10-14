@@ -35,17 +35,7 @@ gh release download "$tag" --repo chanyeinthaw/friday --pattern IMAGE --dir "$te
 image="$(cat "$temporary/IMAGE")"
 [[ "$image" =~ ^ghcr.io/chanyeinthaw/friday-optmem@sha256:[a-f0-9]{64}$ ]] || { printf 'Invalid release image digest.\n' >&2; exit 1; }
 export OPTMEM_IMAGE="$image"
-if ! docker pull "$image"; then
-  gh release download "$tag" --repo chanyeinthaw/friday --pattern friday-optmem-linux-x64.tar.gz --pattern SHA256SUMS --dir "$temporary"
-  checksum="$(awk '$2 == "friday-optmem-linux-x64.tar.gz" { print $1 }' "$temporary/SHA256SUMS")"
-  [[ "$checksum" =~ ^[a-f0-9]{64}$ ]] || { printf 'Invalid binary checksum.\n' >&2; exit 1; }
-  (cd "$temporary" && printf '%s  friday-optmem-linux-x64.tar.gz\n' "$checksum" | sha256sum --check --status)
-  [[ "$(tar -tzf "$temporary/friday-optmem-linux-x64.tar.gz")" == "friday-optmem" ]] || { printf 'Unexpected archive contents.\n' >&2; exit 1; }
-  tar -xzf "$temporary/friday-optmem-linux-x64.tar.gz" --no-same-owner -C "$temporary"
-  image="friday-optmem:binary-$checksum"
-  docker build --tag "$image" --file "$repo/services/friday-optmem/Dockerfile" "$temporary"
-  export OPTMEM_IMAGE="$image"
-fi
+docker pull "$image"
 compose=(docker compose -p fleet-services -f "$repo/services/friday-optmem/compose.yaml")
 previous=""
 if [[ -f "$state/image" ]]; then previous="$(cat "$state/image")"; fi
