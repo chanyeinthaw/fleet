@@ -1,7 +1,7 @@
 services:
   unfold:
     container_name: unfold
-    image: ${UNFOLD_IMAGE:-ghcr.io/chanyeinthaw/unfold:v0.0.0-nightly.2}
+    image: ${UNFOLD_IMAGE:-ghcr.io/chanyeinthaw/unfold:v0.0.0-nightly.3}
     restart: unless-stopped
     env_file:
       - ${FLEET_SERVICES_DATA_DIR}/unfold/runtime.env
