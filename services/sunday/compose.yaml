@@ -1,5 +1,6 @@
 services:
   sunday:
+    profiles: [sunday]
     container_name: sunday
     image: fleet/sunday:nightly.6
     build:
@@ -7,7 +8,7 @@ services:
       args:
         SUNDAY_VERSION: v0.0.0-nightly.6
       secrets: [sunday-github-token]
-    restart: unless-stopped
+    restart: "no"
     network_mode: host
     user: "${SUNDAY_UID:-1000}:${SUNDAY_GID:-1000}"
     environment:

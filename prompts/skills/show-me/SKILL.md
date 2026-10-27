@@ -5,6 +5,10 @@ metadata:
   harness: [pi, codex, claude]
 ---
 
+Disclaimer: Invoking this skill does not mean the user wants to render the show me skill output in t3code's visualization/html rendering. Just use the skill's recommended defaults.
+
+The user's default preferences are diffs, component tree, call stack, pseudo code and directory tree. Mermaid diagrams are only for when the logic is complex.
+
 Help the user understand the current topic of conversation visually. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.
 
 - Show logic or an algorithm as pseudocode:

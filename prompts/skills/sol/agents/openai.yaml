@@ -1,0 +1,5 @@
+interface:
+  display_name: "Sol"
+  short_description: "Coordinate workers with optional independent review"
+policy:
+  allow_implicit_invocation: false

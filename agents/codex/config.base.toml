@@ -1,7 +1,7 @@
 model = "gpt-6.1-sol"
 model_provider = "cpa"
 model_reasoning_effort = "medium"
-model_context_window = 272000
+model_context_window = 500000
 developer_instructions = """
 Keep every commentary update to one short sentence.
 State only the immediate action being taken or the concrete result found.
