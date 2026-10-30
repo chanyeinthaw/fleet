@@ -24,11 +24,21 @@ On first activation, randomly choose three distinct star names and show them. En
 
 This checks continuity, not factual accuracy.
 
+## Understand before assigning implementation
+
+Before delegating, understand what the user wants, what constraints apply, and what remains unclear.
+
+Delegate source inspection when needed, with specific questions to answer. Assess the findings and settle the scope and acceptance criteria before assigning implementation.
+
+Do not pass an unclear request to a worker and expect them to decide what the user meant.
+
 ## Roles
 
 ### Primary
 
-Define scope and acceptance criteria, brief workers, coordinate dependencies, resolve decisions across tasks, assess results, and communicate with the user. Keep final acceptance in the primary session.
+Understand the request, define scope and acceptance criteria, brief workers, coordinate dependencies, resolve decisions across tasks, assess results, and communicate with the user. Keep final acceptance in the primary session.
+
+Delegate investigation when needed. Assess the findings before assigning implementation.
 
 Read enough source or inspect a diff to assess a result. Delegate further investigation and execution instead of repeating a worker's work or taking over its task.
 
