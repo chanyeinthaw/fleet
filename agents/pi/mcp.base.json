@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "executor": {
+      "url": "https://mcp.executor.sh/org/pinch/mcp",
+      "auth": "bearer",
+      "bearerToken": "!\"$HOME/.local/bin/fleet-fnox\" -P agents get EXECUTOR_PAT"
+    }
+  }
+}

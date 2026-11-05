@@ -4,6 +4,7 @@ idle_timeout = "365d"
 
 [profiles.agents.secrets]
 CPA_API_KEY = { provider = "gopass", value = "agents/cpa1-api-key", env = false }
+EXECUTOR_PAT = { provider = "gopass", value = "agents/executor-pat", env = false }
 
 [providers.gopass]
 type = "password-store"

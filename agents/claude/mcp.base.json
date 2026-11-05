@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "executor": {
+      "type": "http",
+      "url": "https://mcp.executor.sh/org/pinch/mcp",
+      "headersHelper": "\"$HOME/.local/bin/fleet-executor-headers\""
+    }
+  }
+}

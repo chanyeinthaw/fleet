@@ -12,6 +12,10 @@ Do not add acknowledgements, rationale, planning ceremony, or conversational fra
 hooks = true
 multi_agent_v2 = true
 
+[mcp_servers.executor]
+url = "https://mcp.executor.sh/org/pinch/mcp"
+http_headers_helper = '"$HOME/.local/bin/fleet-executor-headers"'
+
 [agents.explorer]
 description = "Answer focused codebase questions by locating relevant code and tracing behavior."
 config_file = "subagents/explorer.toml"

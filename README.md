@@ -50,6 +50,8 @@ Fleet configures Pi, Codex, and Claude Code. Their sessions and caches stay in t
 
 Agents retrieve the CPA key through `~/.local/bin/fleet-fnox`, including when launched by T3 Code. No `CPA_API_KEY` export is needed. Claude uses CPA's Anthropic-compatible endpoint with `gpt-6.1-sol` by default.
 
+All three agents connect to Executor at `https://mcp.executor.sh/org/pinch/mcp`. The `agents` fnox profile retrieves `EXECUTOR_PAT` from the encrypted gopass entry `agents/executor-pat`. Codex and Claude use `fleet-executor-headers`; Pi uses its MCP adapter's command token. `mise run link` merges Fleet's MCP servers into Claude's user config and Pi's MCP config, preserving other servers and local state.
+
 `prompts/agents/catalog.yaml` controls the order of shared instructions. The `harness` and `computers` sections select instructions for each agent and point to its global computer reference file.
 
 Codex and Claude share these subagent roles:
