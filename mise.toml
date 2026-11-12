@@ -28,6 +28,7 @@ run = [
   "./scripts/check",
   "./scripts/dotfiles/run",
   "./scripts/tether/run",
+  "./scripts/browse/run",
 ]
 
 [tasks.link]
@@ -51,6 +52,7 @@ run = [
   "./scripts/check",
   "./scripts/dotfiles/run",
   "./scripts/tether/run",
+  "./scripts/browse/run",
 ]
 
 [tasks."services:up"]
@@ -68,3 +70,7 @@ run = "./scripts/services/run restart"
 [tasks."dotfiles:sync"]
 description = "Encrypt the local dotfiles directory into Fleet’s secret store"
 run = "./scripts/dotfiles/run sync"
+
+[tasks.browse]
+description = "Install or reconcile the opted-in browse relay"
+run = ["./scripts/browse/run", "./scripts/link", "./scripts/check"]

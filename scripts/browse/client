@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+"""Connect MCP clients to Fleet's opted-in browse service."""
+
+import os
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "agents"))
+from fleet_config import read_config
+
+if not read_config().get("browse", {}).get("enabled", False):
+    raise SystemExit("Browse is disabled in .fleetrc")
+os.environ["OPENCODE_BROWSER_AUTOSTART"] = "0"
+os.environ["OPENCODE_BROWSER_AUTO_UPDATE"] = "off"
+binary = Path(os.environ.get("XDG_BIN_HOME", Path.home() / ".local/bin")) / "browse"
+os.execv(binary, [str(binary), "mcp"])

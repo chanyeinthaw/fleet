@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""Install and reconcile Fleet's opted-in Linux browse relay."""
+
+import json
+import os
+from pathlib import Path
+import platform
+import subprocess
+import sys
+import tempfile
+import urllib.request
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / "scripts/agents"))
+from fleet_config import read_config
+
+VERSION = "0.0.16"
+MARKER = "# Managed by Fleet: browse"
+
+
+def command(args):
+    return subprocess.run(args, check=True, text=True, capture_output=True).stdout.strip()
+
+
+def main():
+    config = read_config().get("browse", {})
+    unit = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "systemd/user/browse.service"
+    owned = unit.exists() and unit.read_text().startswith(MARKER)
+    if not config.get("enabled", False):
+        if owned:
+            command(["systemctl", "--user", "disable", "--now", "browse.service"])
+        print("Browse disabled; installed files and pairings preserved")
+        return
+    if platform.system() != "Linux":
+        raise ValueError("Fleet's browse service requires Linux with systemd")
+    if unit.exists() and not owned:
+        raise ValueError(f"Refusing to replace unmanaged unit {unit}")
+    binary = Path(os.environ.get("XDG_BIN_HOME", Path.home() / ".local/bin")) / "browse"
+    installed = not binary.exists() or command([str(binary), "--version"]) != VERSION
+    if installed:
+        with urllib.request.urlopen("https://opencode.ai/browse/install", timeout=30) as response:
+            installer = response.read()
+        with tempfile.TemporaryDirectory(prefix="fleet-browse-") as temporary:
+            script = Path(temporary) / "install"
+            script.write_bytes(installer)
+            subprocess.run(["bash", str(script), "--version", VERSION, "--no-setup"], check=True)
+    relay_config = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "browse/config.json"
+    current = json.loads(relay_config.read_text()) if relay_config.exists() else {}
+    desired = {**current, "hostname": "0.0.0.0" if config.get("remote", False) else "127.0.0.1"}
+    changed = installed or current != desired
+    if changed:
+        relay_config.parent.mkdir(parents=True, exist_ok=True)
+        relay_config.write_text(json.dumps(desired, indent=2) + "\n")
+        relay_config.chmod(0o600)
+    content = f'''{MARKER}
+[Unit]
+Description=Browse browser relay
+After=network.target
+
+[Service]
+ExecStart="{binary}" serve
+Environment=OPENCODE_BROWSER_AUTO_UPDATE=off
+SuccessExitStatus=130
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
+'''
+    if not unit.exists() or unit.read_text() != content:
+        unit.parent.mkdir(parents=True, exist_ok=True)
+        unit.write_text(content)
+        command(["systemctl", "--user", "daemon-reload"])
+        changed = True
+    command(["systemctl", "--user", "enable", "--now", "browse.service"])
+    if changed:
+        command(["systemctl", "--user", "restart", "browse.service"])
+    print(f"Browse {VERSION} running; remote connections {'enabled' if config.get('remote', False) else 'disabled'}")
+
+
+if __name__ == "__main__":
+    main()

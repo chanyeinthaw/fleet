@@ -11,7 +11,7 @@ cd ~/fleet
 mise run bootstrap
 ```
 
-Bootstrap installs tools, Pi dependencies, and agent configuration. It also installs dotfiles when enabled in `.fleetrc` and reconciles the opted-in Tether user service. Compose services remain separate.
+Bootstrap installs tools, Pi dependencies, and agent configuration. It also installs dotfiles when enabled in `.fleetrc` and reconciles the opted-in Tether and browse user services. Compose services remain separate.
 
 ```sh
 mise run update  # Refresh tools and configuration
@@ -182,6 +182,42 @@ Missing or `enabled = false` skips installation. If Fleet already manages the us
 systemctl --user status tether.service
 journalctl --user -u tether.service -f
 cat ~/.local/state/tether/state.json
+```
+
+## Browse
+
+Browse connects Fleet's agents to your existing Chrome profile through its [Chrome extension](https://chromewebstore.google.com/detail/mfnicocicmmlkpjnaffgihfjhdgjkdjg). Fleet installs browse v0.0.16 as a Linux systemd user service and configures its MCP server for Codex, Claude, and Pi.
+
+Opt in per machine in `.fleetrc`:
+
+```toml
+[browse]
+enabled = true
+remote = true
+```
+
+```sh
+mise run browse
+```
+
+Bootstrap and update also reconcile browse. `remote = false`, the default, binds to localhost. `remote = true` allows a browser on another computer to connect; use Tailscale because the extension uses unencrypted WebSockets. Fleet pins browse's version and disables automatic updates for its service and MCP clients.
+
+For Chrome on Athena, install the extension in the `chan` browser profile. In its options, choose **Connect an agent on another computer**, enter `silicon:19988` as the relay address, and enter a fresh pairing code generated on Silicon:
+
+```sh
+browse pair
+```
+
+Each code works once and expires after ten minutes. Both computers must be connected to Tailscale. Restart agent sessions after enabling browse to load its MCP tools.
+
+The current extension hardcodes `ws://`, so it cannot connect through a Pangolin HTTPS endpoint. No Pangolin resource is needed. The relay accepts only paired extension connections remotely; its HTTP control API and CDP remain local.
+
+Set `enabled = false` and run `mise run browse` to stop and disable Fleet's relay and remove its MCP entries. The binary, pairings, and session data remain. MCP clients cannot automatically restart the disabled service.
+
+```sh
+browse status
+systemctl --user status browse.service
+journalctl --user -u browse.service -f
 ```
 
 ## Services

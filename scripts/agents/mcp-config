@@ -6,6 +6,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from fleet_config import REPO, browse_mcp
 
 
 def main() -> None:
@@ -15,9 +16,15 @@ def main() -> None:
     base = json.loads(Path(base_name).read_text())
     target = Path(target_name)
     current = json.loads(target.read_text()) if target.exists() else {}
+    browse = browse_mcp()
+    servers = current.get("mcpServers", {}).copy()
+    if browse:
+        base["mcpServers"]["browse"] = browse
+    elif servers.get("browse", {}).get("command") == str(REPO / "scripts/browse/client"):
+        servers.pop("browse")
     merged = {
         **current,
-        "mcpServers": {**current.get("mcpServers", {}), **base["mcpServers"]},
+        "mcpServers": {**servers, **base["mcpServers"]},
     }
     if action == "check":
         if target.is_symlink() or not target.is_file() or merged != current:

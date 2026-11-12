@@ -16,8 +16,8 @@ DEFAULT_SECRET = "agents/cpa1-api-key"
 def read_config():
     path = REPO / ".fleetrc"
     config = tomllib.loads(path.read_text()) if path.exists() else {}
-    if set(config) - {"agents", "author", "dotfiles", "tether"}:
-        raise ValueError(".fleetrc supports the agents, author, dotfiles, and tether sections")
+    if set(config) - {"agents", "author", "dotfiles", "tether", "browse"}:
+        raise ValueError(".fleetrc supports the agents, author, dotfiles, tether, and browse sections")
     author = config.get("author", {})
     if not isinstance(author, dict) or set(author) - {"name"}:
         raise ValueError(".fleetrc author supports name")
@@ -30,6 +30,9 @@ def read_config():
     tether = config.get("tether", {})
     if not isinstance(tether, dict) or set(tether) - {"enabled"} or not isinstance(tether.get("enabled", False), bool):
         raise ValueError(".fleetrc tether supports enabled = true or false")
+    browse = config.get("browse", {})
+    if not isinstance(browse, dict) or set(browse) - {"enabled", "remote"} or any(not isinstance(browse.get(key, False), bool) for key in ("enabled", "remote")):
+        raise ValueError(".fleetrc browse supports enabled and remote = true or false")
     return config
 
 
@@ -84,3 +87,9 @@ def fnox_config():
         finally:
             temporary.unlink(missing_ok=True)
     return target
+
+
+def browse_mcp():
+    if not read_config().get("browse", {}).get("enabled", False):
+        return None
+    return {"command": str(REPO / "scripts/browse/client"), "args": []}
