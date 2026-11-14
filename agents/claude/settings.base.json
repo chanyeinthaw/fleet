@@ -22,6 +22,7 @@
   },
   "env": {
     "ANTHROPIC_BASE_URL": "https://cpa1.p.si14.space",
+    "CLAUDE_CODE_EXPERIMENTAL_CODE_MODE": "1",
     "CLAUDE_CODE_DISABLE_EXPLORE_PLAN_AGENTS": "1"
   },
   "permissions": {
