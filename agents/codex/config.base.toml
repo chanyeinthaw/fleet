@@ -16,6 +16,9 @@ multi_agent_v2 = true
 url = "https://mcp.executor.sh/org/pinch/mcp"
 http_headers_helper = '"$HOME/.local/bin/fleet-executor-headers"'
 
+[mcp_servers.figma]
+url = "https://figma-mcp-oxygen.tailcd7ccb.ts.net/mcp"
+
 [agents.explorer]
 description = "Answer focused codebase questions by locating relevant code and tracing behavior."
 config_file = "subagents/explorer.toml"

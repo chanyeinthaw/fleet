@@ -1,5 +1,8 @@
 {
   "mcpServers": {
+    "figma": {
+      "url": "https://figma-mcp-oxygen.tailcd7ccb.ts.net/mcp"
+    },
     "executor": {
       "url": "https://mcp.executor.sh/org/pinch/mcp",
       "auth": "bearer",
