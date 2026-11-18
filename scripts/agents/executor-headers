@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Return Executor authentication headers using Fleet's encrypted secret store."""
+"""Return Executor authentication headers as JSON, or only the Authorization value with --value."""
 
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 token = subprocess.check_output(
     [str(Path.home() / ".local/bin/fleet-fnox"), "-P", "agents", "get", "EXECUTOR_PAT"],
     text=True,
 ).strip()
-print(json.dumps({"Authorization": "Bearer " + token}))
+value = "Bearer " + token
+print(value if sys.argv[1:] == ["--value"] else json.dumps({"Authorization": value}))
