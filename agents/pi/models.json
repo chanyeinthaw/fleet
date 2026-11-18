@@ -91,6 +91,13 @@
           }
         }
       ]
+    },
+    "opencode-go": {
+      "modelOverrides": {
+        "deepseek-v4.1-flash": { "thinkingLevelMap": { "xhigh": "xhigh" } },
+        "glm-5.3": { "thinkingLevelMap": { "xhigh": "xhigh" } },
+        "glm-5.3-flash": { "thinkingLevelMap": { "xhigh": "xhigh" } }
+      }
     }
   }
 }
