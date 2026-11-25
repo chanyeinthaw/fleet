@@ -243,6 +243,7 @@ Use `up` to apply configuration or image changes. `restart` keeps the existing c
 | Newt | Pangolin site with host access to both CPAs |
 | Friday | HTTP at `127.0.0.1:4020`, OpenSSH, and Tailscale |
 | Sunday | Discord bot; host networking reaches T3 at `localhost:3773` |
+| Blob-1 Sunday | Blob-1 execution node; dials `blob-1` on the Compose network |
 | Docker-in-Docker | TLS on the private Compose network |
 
 Secrets use separate fnox profiles. The launcher maps each profile's values to Compose variables and injects credentials at runtime. Warm the cache before service operations if GPG is locked.
@@ -287,6 +288,16 @@ mise run services:up -- --build --no-deps sunday
 For initial pairing or an expired session, pipe a fresh normal T3 pairing code to `python scripts/services/compose run --rm --no-deps -T sunday pair`. Existing valid credentials can be copied into the service data directory as `credential.json` with mode `0600` while Sunday is stopped. Normal sessions require pairing again at expiry. Sunday is configured with an administrative session for automatic renewal; renewal preserves the full permission grant. Only one running process should use a credential state directory.
 
 Container console logs rotate at 10 MiB with three files retained. The append-only `sunday/logs/sunday.jsonl` file needs separate rotation.
+
+### Blob-1 Sunday
+
+Blob-1 Sunday runs the `blob-1` image with `BLOB_1_MODE=node`. It dials the primary at `ws://blob-1:7878/ws/node` and serves bot tool calls in `~/.blob-1/workspaces`. Its node identity is in `~/.blob-1/node.toml`. Both live in the service data directory's `blob-1-sunday/home` folder. The container is capped at 4 vCPUs and 8 GB of memory and uses the shared Docker daemon. It needs no secrets. Set `BLOB_1_SUNDAY_TAILSCALE_AUTH_KEY` to join the tailnet as `blob-1-sunday`.
+
+On first start, the node waits as pending. Accept it on Blob-1's Environments page or with `blob-1 environment accept <node-id> --name sunday` inside the `blob-1` container.
+
+```sh
+mise run services:up -- --build --no-deps blob-1-sunday
+```
 
 ### Shared Docker daemon
 

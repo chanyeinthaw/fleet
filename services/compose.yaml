@@ -7,4 +7,6 @@ include:
   - newt/compose.yaml
   - docker-in-docker/compose.yaml
   - friday/compose.yaml
+  - blob-1/compose.yaml
+  - blob-1-sunday/compose.yaml
   - sunday/compose.yaml

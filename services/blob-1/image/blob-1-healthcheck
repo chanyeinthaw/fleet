@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+supervisorctl -c /etc/supervisor/supervisord.conf status blob-1 | grep -q '^blob-1[[:space:]]\+RUNNING'
+# A node serves no HTTP; the running process is the whole check.
+if [[ "${BLOB_1_MODE:-serve}" != node ]]; then
+  curl -fsS http://127.0.0.1:7878/ >/dev/null
+fi

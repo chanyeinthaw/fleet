@@ -1,0 +1,43 @@
+services:
+  blob-1-sunday:
+    container_name: blob-1-sunday
+    image: fleet/blob-1:0.0.0-latest.20261124.1452
+    build:
+      context: ../blob-1/image
+      args:
+        BLOB_1_VERSION: 0.0.0-latest.20261124.1452
+    restart: unless-stopped
+    cpus: 4
+    mem_limit: 8g
+    depends_on:
+      blob-1:
+        condition: service_healthy
+      docker-in-docker:
+        condition: service_healthy
+    networks: [default, docker-in-docker]
+    environment:
+      BLOB_1_MODE: node
+      BLOB_1_NODE_URL: ws://blob-1:7878/ws/node
+      DOCKER_HOST: tcp://docker-in-docker:2376
+      DOCKER_TLS_VERIFY: "1"
+      DOCKER_CERT_PATH: /certs/client
+      TAILSCALE_AUTH_KEY: ${BLOB_1_SUNDAY_TAILSCALE_AUTH_KEY:-}
+      TAILSCALE_HOSTNAME: blob-1-sunday
+    volumes:
+      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/blob-1-sunday/home:/home/blob/.blob-1
+      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/blob-1-sunday/gh:/home/blob/.config/gh
+      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/blob-1-sunday/ssh:/home/blob/.ssh
+      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/blob-1-sunday/ssh-host:/var/lib/blob-1-ssh
+      - ${FLEET_SERVICES_DATA_DIR:?set by scripts/services}/blob-1-sunday/tailscale:/var/lib/tailscale
+      - docker-in-docker-certs:/certs/client:ro
+    healthcheck:
+      test: [CMD, /usr/local/bin/blob-1-healthcheck]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

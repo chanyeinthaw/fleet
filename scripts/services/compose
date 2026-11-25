@@ -10,7 +10,7 @@ import sys
 repo = Path(__file__).resolve().parents[2]
 env = os.environ.copy()
 env.setdefault("FLEET_SERVICES_DATA_DIR", str(Path(env.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "fleet/services"))
-for profile in ("postgres", "cpa1", "cpa2", "newt", "friday", "sunday"):
+for profile in ("postgres", "cpa1", "cpa2", "newt", "friday", "sunday", "blob-1"):
     result = subprocess.run(
         [str(repo / "scripts/secrets/fnox"), "-P", profile, "export", "--format", "json"],
         capture_output=True,
@@ -19,7 +19,7 @@ for profile in ("postgres", "cpa1", "cpa2", "newt", "friday", "sunday"):
         sys.exit(f"Could not resolve the {profile} fnox profile; check GPG access.")
     secrets = json.loads(result.stdout)["secrets"]
     for name, value in secrets.items():
-        key = name if profile == "postgres" else f"{profile.upper()}_{name}"
+        key = name if profile == "postgres" else f"{profile.upper().replace('-', '_')}_{name}"
         env[key] = value
 
 env.setdefault("SUNDAY_UID", str(os.getuid()))

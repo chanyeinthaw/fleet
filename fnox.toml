@@ -37,3 +37,7 @@ TAILSCALE_AUTH_KEY = { provider = "gopass", value = "services/friday/tailscale-a
 [profiles.sunday.secrets]
 CPA_API_KEY = { provider = "gopass", value = "agents/cpa1-api-key" }
 DISCORD_BOT_TOKEN = { provider = "gopass", value = "services/sunday/discord-bot-token" }
+
+[profiles.blob-1.secrets]
+CPA1_KEY = { provider = "gopass", value = "agents/cpa1-api-key" }
+APP_KEY = { provider = "gopass", value = "services/blob-1/app-key" }
