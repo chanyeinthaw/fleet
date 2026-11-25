@@ -2,7 +2,7 @@
 name: grill-me
 description: A relentless interview to sharpen a plan or design.
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 disable-model-invocation: true
 ---
 

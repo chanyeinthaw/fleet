@@ -2,7 +2,7 @@
 name: sol-loop
 description: Use when the user says "sol loop".
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 ---
 
 # sol-loop

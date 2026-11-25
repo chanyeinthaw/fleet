@@ -2,7 +2,7 @@
 name: wait-what
 description: "Stop. That last message did not land: re-pitch it."
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 disable-model-invocation: true
 ---
 

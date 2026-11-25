@@ -2,7 +2,7 @@
 name: takeover
 description: Take over existing work. Use when the user asks to take over a PR, branch, or agent thread, or requests a takeover.
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 ---
 
 # Takeover

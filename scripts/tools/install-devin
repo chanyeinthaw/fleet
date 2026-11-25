@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Install Fleet's pinned Devin CLI release without starting interactive setup."""
+import hashlib
+import json
+import os
+import platform
+import tarfile
+import tempfile
+import urllib.request
+from pathlib import Path
+
+version = "3000.14.30821"
+platforms = {
+    ("Linux", "x86_64"): "x86_64-unknown-linux",
+    ("Linux", "aarch64"): "aarch64-unknown-linux",
+    ("Darwin", "x86_64"): "x86_64-apple-darwin",
+    ("Darwin", "arm64"): "aarch64-apple-darwin",
+}
+target = platforms.get((platform.system(), platform.machine()))
+if target is None:
+    raise SystemExit("Unsupported platform for Devin CLI")
+root = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) / "devin/cli/_versions"
+release = root / version
+binary = release / "bin/devin"
+if not binary.is_file():
+    with urllib.request.urlopen(f"https://static.devin.ai/cli/{version}/manifest.json") as response:
+        manifest = json.load(response)
+    artifact = manifest["platforms"][target]
+    root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=root) as name:
+        temporary = Path(name)
+        archive = temporary / "devin.tar.gz"
+        urllib.request.urlretrieve(artifact["url"], archive)
+        if hashlib.sha256(archive.read_bytes()).hexdigest() != artifact["sha256"]:
+            raise SystemExit("Devin CLI checksum mismatch")
+        extracted = temporary / "release"
+        extracted.mkdir()
+        with tarfile.open(archive, "r:gz") as bundle:
+            bundle.extractall(extracted, filter="data")
+        if not (extracted / "bin/devin").is_file():
+            raise SystemExit("Devin CLI bundle has no executable")
+        extracted.rename(release)
+link = Path.home() / ".local/bin/devin"
+link.parent.mkdir(parents=True, exist_ok=True)
+if link.is_symlink() and link.resolve() == binary.resolve():
+    print(f"Devin {version} is installed")
+elif link.is_symlink() and link.resolve().is_relative_to(root.resolve()):
+    link.unlink()
+    link.symlink_to(binary)
+    print(f"Updated Devin {version} at {link}")
+elif link.exists() or link.is_symlink():
+    raise SystemExit(f"Refusing to replace existing {link}")
+else:
+    link.symlink_to(binary)
+    print(f"Installed Devin {version} at {link}")

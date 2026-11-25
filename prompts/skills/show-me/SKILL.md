@@ -2,7 +2,7 @@
 name: show-me
 description: Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 ---
 
 Disclaimer: Invoking this skill does not mean the user wants to render the show me skill output in t3code's visualization/html rendering. Just use the skill's recommended defaults.

@@ -2,7 +2,7 @@
 name: t3-pair
 description: Use when we need to issue a T3 Code pairing code.
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 ---
 
 # T3 pairing

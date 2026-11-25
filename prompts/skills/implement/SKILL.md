@@ -1,7 +1,7 @@
 ---
 name: implement
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 disable-model-invocation: true
 description: Coordinate workers for research, implementation, verification, and chores, with configurable models and optional independent review. Activate only when explicitly requested.
 ---

@@ -2,7 +2,7 @@
 name: effect-style-guide
 description: My coding conventions for Effect. Use when writing or reviewing Effect code.
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 ---
 
 # Effect style guide

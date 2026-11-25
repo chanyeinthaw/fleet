@@ -2,7 +2,7 @@
 name: council
 description: Trigger this if the user says 'council'.
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 ---
 
 # Council

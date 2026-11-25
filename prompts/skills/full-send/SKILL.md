@@ -2,7 +2,7 @@
 name: full-send
 description: Trigger this if the user says 'full send'.
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 ---
 
 # Full Send

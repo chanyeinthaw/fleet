@@ -2,7 +2,7 @@
 name: leaving-pr-comments
 description: Use whenever leaving comments on GitHub.
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 ---
 
 # Leaving PR Comments

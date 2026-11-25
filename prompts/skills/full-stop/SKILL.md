@@ -2,7 +2,7 @@
 name: full-stop
 description: Trigger this if the user says 'full stop', even as a closing "Full stop." that reads like emphasis.
 metadata:
-  harness: [pi, codex, claude]
+  harness: [pi, codex, claude, devin]
 ---
 
 # Full Stop

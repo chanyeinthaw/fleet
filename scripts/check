@@ -5,6 +5,7 @@ repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 pi_home="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
 claude_home="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+devin_home="${XDG_CONFIG_HOME:-$HOME/.config}/devin"
 claude_user_config="${CLAUDE_CONFIG_DIR:-$HOME}/.claude.json"
 opencode_home="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 failures=0
@@ -113,6 +114,9 @@ for agent in "$repo"/agents/claude/agents/*.md; do
   check_link "$agent" "$claude_home/agents/$(basename "$agent")"
 done
 check_skills opencode "$opencode_home/skills"
+"$repo/scripts/agents/instructions" check "$repo/prompts/agents/catalog.yaml" devin "$devin_home/AGENTS.md" || failures=$((failures + 1))
+check_link "$repo/prompts/references/COMPUTERS.md" "$devin_home/COMPUTERS.md"
+check_skills devin "$devin_home/skills"
 
 for target in "$codex_home"/*.config.toml; do
   [[ -L "$target" ]] || continue
@@ -126,7 +130,7 @@ done
 check_link "$repo/scripts/secrets/fnox" "$HOME/.local/bin/fleet-fnox"
 check_link "$repo/scripts/agents/executor-headers" "$HOME/.local/bin/fleet-executor-headers"
 
-for command in mise pi codex claude gopass; do
+for command in mise pi codex claude devin gopass; do
   if command -v "$command" >/dev/null; then
     printf 'OK    %s is installed\n' "$command"
   else

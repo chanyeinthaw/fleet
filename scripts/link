@@ -5,6 +5,7 @@ repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 pi_home="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 codex_home="${CODEX_HOME:-$HOME/.codex}"
 claude_home="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+devin_home="${XDG_CONFIG_HOME:-$HOME/.config}/devin"
 claude_user_config="${CLAUDE_CONFIG_DIR:-$HOME}/.claude.json"
 opencode_home="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}"
 backup_root="${XDG_STATE_HOME:-$HOME/.local/state}/fleet/backups/$(date +%Y%m%d-%H%M%S)"
@@ -125,6 +126,10 @@ for agent in "$repo"/agents/claude/agents/*.md; do
 done
 
 sync_skills opencode "$opencode_home/skills"
+
+"$repo/scripts/agents/instructions" sync "$repo/prompts/agents/catalog.yaml" devin "$devin_home/AGENTS.md"
+link_path "$repo/prompts/references/COMPUTERS.md" "$devin_home/COMPUTERS.md"
+sync_skills devin "$devin_home/skills"
 
 for target in "$codex_home"/*.config.toml; do
   [[ -L "$target" ]] || continue

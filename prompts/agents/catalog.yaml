@@ -28,8 +28,10 @@ harness:
   pi: harness/pi.md
   codex: harness/codex.md
   claude: harness/claude.md
+  devin: harness/devin.md
 
 computers:
   pi: computers/pi.md
   codex: computers/codex.md
   claude: computers/claude.md
+  devin: computers/devin.md
